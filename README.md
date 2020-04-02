@@ -1,4 +1,2 @@
 # moneos-test
 moneos
-
-blablabla
