@@ -43,7 +43,7 @@ tabel_staalnamelocaties <- read_excel("../tabellen/070_Macrobenthos_tabellen.xls
     sheet = "staalnamelocaties", .name_repair = "minimal")
 
 tabel_staalnamelocaties %>% 
-  knitr::kable(caption = "Aantal staalnamelocaties per waterlichaam (sectie) - monitoringscampagne 2016XXX.",
+  knitr::kable(caption = "Aantal staalnamelocaties per waterlichaam (sectie) - monitoringscampagne 2016**XXX**.",
              # "latex", 
              booktabs = T) %>% 
     kable_styling(latex_options = c("scale_down"),
