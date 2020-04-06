@@ -154,7 +154,7 @@ tabel_indeling_schelde_estuarium %>%
 
 
 ```{r figuur-waterlichamen, fig.cap = "Overzicht van de Kaderrichtlijn Water waterlichamen."}
-knitr::include_graphics("../figuren/Kaderrichtlijn_water_waterlichamen.jpg")
+knitr::include_graphics("../figuren/010_Kaderrichtlijn_water_waterlichamen.jpg")
 ```
 
 
