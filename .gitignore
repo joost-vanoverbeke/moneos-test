@@ -45,5 +45,5 @@ vignettes/*.pdf
 # folders
 css/
 output/
-bookdown_files/
+_bookdown_files/
 

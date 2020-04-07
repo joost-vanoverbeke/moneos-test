@@ -120,7 +120,7 @@ Thema Fauna & Flora en thema Ecologisch Functioneren
 -	Zoogdieren
 
 
-De aangeleverde data omvatten enkel gegevens van de Zeeschelde en getijgebonden zijrivieren. Tenzij anders vermeld kunnen ze gebruikt worden tot op niveau 3 van de Evaluatiemethodiek wat overeenkomt met de saliniteitszones aangevuld met de getijdenzijrivieren (Durme, Netes, Dijle en Zenne (Tabel \@ref(tab:tabel-indeling-schelde-estuarium))[^footnote-3]. Deze indeling valt samen met de indeling in waterlichamen van de Kaderrichtlijn Water (KRW) (Figuur \@ref(fig:figuur-waterlichamen)).  
+De aangeleverde data omvatten enkel gegevens van de Zeeschelde en getijgebonden zijrivieren. Tenzij anders vermeld kunnen ze gebruikt worden tot op niveau 3 van de Evaluatiemethodiek wat overeenkomt met de saliniteitszones aangevuld met de getijdenzijrivieren (Durme, Netes, Dijle en Zenne (Tabel \@ref(tab:tabel-indeling-schelde-estuarium))[^footnote-3]. Deze indeling valt samen met de indeling in waterlichamen van de Kaderrichtlijn Water (KRW) (Figuur \@ref(fig:010-figuur-waterlichamen)).  
 
 [^footnote-3]: Het deel van de Zeeschelde niet beschouwd in de Evaluatiemethodiek zou onderdeel kunnen worden van Z7. Ook wordt het traject Melle-Zwijnaarde (getijde Zeeschelde) niet gerekend tot Zeeschelde I in de KRW indeling. Dit zou beter wel deel worden van deze zone.
 
@@ -153,7 +153,7 @@ tabel_indeling_schelde_estuarium %>%
 
 
 
-```{r figuur-waterlichamen, fig.cap = "Overzicht van de Kaderrichtlijn Water waterlichamen."}
+```{r 010-figuur-waterlichamen, fig.cap = "Overzicht van de Kaderrichtlijn Water waterlichamen."}
 knitr::include_graphics("../figuren/010_Kaderrichtlijn_water_waterlichamen.jpg")
 ```
 
