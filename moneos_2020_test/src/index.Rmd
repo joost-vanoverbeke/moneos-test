@@ -2,9 +2,9 @@
 title: "MONEOS - Geïntegreerd datarapport INBO: Toestand Zeeschelde 2019"
 author: 
   - 
+  - 
     name: "Joost Vanoverbeke"
     email: "joost.vanoverbeke@inbo.be"
-  - 
     name: "Gunther Van Ryckegem"
     email: "gunther.vanryckegem@inbo.be" 
 subtitle: " Monitoringsoverzicht en 1ste lijnsrapportage Geomorfologie, diversiteit Habitats en diversiteit Soorten"
@@ -14,9 +14,6 @@ bibliography: references.bib
 link-citations: TRUE
 site: bookdown::bookdown_site
 output:
-  bookdown::gitbook:
-    split_by: "chapter+number"
-    template: !expr INBOmd::inbo_rapport_css("html")
   bookdown::pdf_book:
     base_format: INBOmd::inbo_rapport
     style: INBO
@@ -25,6 +22,9 @@ output:
     lot: TRUE
     floatbarrier: subsection
     # header-includes: \usepackage{xcolor}
+  bookdown::gitbook:
+    split_by: "chapter+number"
+    template: !expr INBOmd::inbo_rapport_css("html")
   bookdown::epub_book:
     stylesheet: "css/inbo_rapport.css"
     template: !expr INBOmd::inbo_rapport_css("epub")
@@ -47,6 +47,7 @@ library(kableExtra)
 library(tidyverse)
 library(ggpubr)
 library(readxl)
+library(lubridate)
 library(INBOtheme)
 if (interactive()) {
   theme_set(

@@ -1,2 +1,253 @@
 
 # Watervogels
+
+Fichenummer: FICHE S-DS-V-007a – Maandelijkse vogeltellingen
+
+Fichenummer: FICHE S-DS-V-007b – Vogeltellingen zijrivieren 
+
+__Gunther Van Ryckegem__
+
+## Inleiding
+
+Het voorkomen van watervogels kan indicatief zijn voor het estuarien ecosysteemfunctioneren. Aantalsveranderingen kunnen zowel door factoren van buiten (extern - klimaat, Europese populatietrends,…) als van binnen (intern) het estuarium gestuurd worden. Dit betekent dat trends steeds in een ruimer kader en met de nodige omzichtigheid geëvalueerd moeten worden. Interne factoren kunnen bijvoorbeeld een gewijzigd voedselaanbod, foerageerareaal of een gewijzigde verstoringinvloed zijn. 
+
+De eerstelijnsrapportage beschrijft de aangeleverde watervogeldata van de Zeeschelde en de zijrivieren met een focus op de verzamelde tellingen tot de winter van 2017 (eindigend in maart 2018). De data werden gefilterd uit de Watervogeldatabank van het INBO.
+
+Beide fiches werden in één excel bestand aangeleverd: “DataMONEOSWatervogels-Zeeschelde_zijrivieren_totwinter2017.xlsx”
+
+De evaluatie heeft volgende informatie nodig: aantallen vogels per soort per maand per segment op niveau 2 en 3 (niveau 2 is som van de waterlichamen; niveau 3 heeft betrekking op het waterlichaam of de saliniteitszone) [@marisEvaluatiemethodiekScheldeestuariumUpdate2014]. 
+
+De dataset bevat volgende informatievelden: riviernaam, telseizoen, maand, jaar, krw, soort en aantal, waarbij:
+
+- riviernaam: het naamveld van de rivier (Zeeschelde, Durme, Rupel, Zenne, Dijle)
+- telseizoen: een vogeltelseizoen loopt van juli jaar x tot juni jaar x+1. 
+- krw: indeling volgens Figuur \@ref(fig:010-figuur-waterlichamen).
+- aantal: de aantallen omvatten de som van de getelde vogels per soort, per maand, per rivier en krwzone. 
+
+
+## Materiaal en methode
+
+Sinds oktober 1991 tellen medewerkers van het INBO maandelijks het aantal watervogels langs de Zeeschelde vanaf de Belgisch-Nederlandse grens tot Gent. De trajecten op Nederlands grondgebied werden niet opgenomen. De aangeleverde data lopen van oktober 1991 tot en met maart 2017. Oorspronkelijk werd enkel tijdens de winter (oktober – maart) geteld, vanaf 1993 wordt ook tijdens de zomer geteld. Sinds de winter van 1995/1996 wordt ook geteld langsheen de Rupel (Rupelmonding – sas van Wintam). De tellingen gebeuren vanaf een boot en bij laag tij. Omdat het niet haalbaar is om het volledige onderzoeksgebied grondig te tellen tijdens de periode van laag tij, worden de telling gespreid over drie dagen. De dagen worden steeds gegroepeerd in het midden van de maand. Alle watervogelsoorten (en steltlopers) worden geteld sinds het begin van de tellingen, de meeuwen worden geteld sinds oktober 1999. De tellingen langsheen de zijrivieren (behalve het deel tussen de Rupelmonding tot Wintam) worden geteld vanop de rivieroever door vrijwilligers.
+
+__Ruimtelijke en temporele afbakening data__
+
+_Boottellingen_
+
+De data omvatten de aantallen watervogels op de Zeeschelde, geteld vanop de boot. Dit is inclusief deze op het traject Melle-Gentbrugge dat geteld wordt vanaf de dijk (in de databank als traject Tijgebonden oude Schelde Gent - tot aan monding Ringvaart (2050810)) en deze op het gedeelte van de Rupel dat vanop de boot wordt geteld. Om de data voor het waterlichaam ZSIII+Rupel compleet te maken wordt de dataset aangevuld met tellingen van de Rupel die zijn geteld vanaf de dijk. De dijktellingen gaan enkel door in de winter. De teltrajecten (9999999 en 9999998) gelegen op Nederlands grondgebied werden niet in rekening gebracht voor de data analyse.
+
+_Zijrivieren_
+
+De geselecteerde teltrajecten van de zijrivieren (Watervogeldatabank, INBO) zijn weergegeven in Tabel \@ref(tab:100-tabel-teltrajecten). Voor de Getijdenetes zijn geen afzonderlijke riviertellingen beschikbaar; voor de Getijdedijle is een zeer beperkte dataset beschikbaar (1996, 1999 en verder vanaf 2008). Eén teltraject in de Durme (Durmemonding tot Mirabrug) werd niet geteld in 2007-2008.
+
+_Ontbrekende data telseizoen 2017/18_:
+
+- Zenne
+    + 3121412: februari 2018.
+-	Dijle
+    +	3121003: maart 2018 ontbreekt.
+-	Zeeschelde/Rupel/Durme
+    +	Geen ontbrekende data
+
+
+
+```{r 100-tabel-teltrajecten}
+
+tabel_teltrajecten <- read_excel("../tabellen/100_Watervogels_tabellen.xlsx", 
+    sheet = "teltrajecten", .name_repair = "minimal")
+
+tabel_teltrajecten[3,4] <- paste0(tabel_teltrajecten[3,4], 
+                                footnote_marker_number(1))
+
+tabel_teltrajecten %>% 
+  knitr::kable(caption = "Geselecteerde teltrajecten opgenomen in de exploratieve data-analyse en in de data-aanlevering.",
+             # "latex", 
+             booktabs = T,
+             escape = F) %>% 
+    kable_styling(latex_options = c("scale_down"),
+                  font_size = 12) %>%
+  footnote(number = "Opgelet dit teltraject omvat data van zowel de getijgebonden Durme als van de afgesneden ‘oude’ Durme-arm. Sinds oktober 2012 wordt de getijgebonden Durme afzonderlijk geteld.",
+           threeparttable = TRUE)
+
+```
+
+
+## Exploratieve data-analyse watervogelaantallen
+
+De globale patronen in de maandelijkse vogelaantallen langsheen de Zeeschelde blijven afnemend (**xx**). De wintermaxima[^footnote-100-1] laten zich tellen in de maanden december en januari en schommelen dan rond een totaal van 13 000 watervogels en meeuwen. De laagste aantallen worden geteld in maart. De vogelaantallen zijn zwak afnemend sinds 2007, na een periode met sterke afname in vogelaantallen tussen 2002 en 2006. 
+
+[^footnote-100-1]: Maximum van de som van alle vogels per wintermaand (oktober tot en met maart).
+
+De winter van 2017/18[^footnote-100-1] was klimatologisch gezien normaal. Gemiddelde neerslag, gemiddelde wintertemperatuur en gemiddelde zonneschijn. Er werden geen lange vorstperiodes genoteerd waardoor geen opvallende winterinflux van vogels naar de Zeeschelde optrad. http://www.meteo.be/meteo/view/nl/37169816-Winter+2018.html#ppt_37170051. De proportionele verdeling van de watervogels in de verschillende waterlichamen (zie waterlichamen in **XXX**) toont een geleidelijke toename van het aantal vogels dat verblijft in de Beneden-Zeeschelde. Het aandeel watervogels dat verbleef in de Durme is verhoudingsgewijs gedaald in de winter 2017/18 (**xx**).
+
+[^footnote-100-2]: KMI winter 2018 (dec 2017- feb 2018) ~= wintervogeljaar (telseizoen 2017/18).
+
+Per deelgebied (**xx**):
+
+In __Zeeschelde I__ (Gentbrugge – Dendermonde) werd het laagste aantal overwinternde watervogels geteld sinds 20 jaar (1998/99). De vogelaantallen schommelen relatief sterk tussen de jaren. 
+
+In __Zeeschelde II__ (Dendermonde – Durmemonding) is na de sterk dalende trend tussen 2001 en 2009 een relatief stabiel aantal watervogels aanwezig. Gedurende winterseizoen 2017/18 was ook in deze zone het aantal watervogels historisch laag. 
+
+__Zeeschelde III__ (Durmemonding - Kennedytunnel) __+ Rupel__ kende proportioneel de grootste afname in watervogelaantallen tussen 2006 en 2010. Deze afname zet zich nog steeds verder. 
+
+In __Zeeschelde IV__ (Kennedytunnel – Grens) vertonen de winteraantallen tussen 1999 en 2007 een dalende trend. In de periode 2008-2013 lijken de aantallen zich te stabiliseren. Sinds 2013 zijn de vogelaantallen licht afnemend en bedragen ze rond minder dan 25 000 getelde wintervogels. De terugval is vooral waarneembaar in een sterke afname van de aantallen smient, wintertaling en grauwe gans (zie Van Ryckegem, 2013). De watervogelaantallen zijn in het winterseizoen 2017/18 opnieuw lager dan vorige winterseizoen.
+
+De __Zenne__ (**xx**) was tot 2007 nagenoeg ‘vogeldood’ maar herbergt sindsdien hoge aantallen overwinteraars. De hoogste aantallen werden geteld in de winter 2007-2008 maar van een grote terugval (factor 10 lager) zoals op de Rupel en Dijle is geen sprake. Toch halveerde ook hier het aantal overwinteraars.
+
+De trends in de  __Getijdedurme__ zijn enigszins moeilijker te interpreteren omdat de afbakening van het telgebied veranderde. Tot oktober 2012 werden de vogelaantallen van de Oude Durme en de Getijdendurme opgeteld. Sindsdien worden de vogelaantallen afzonderlijk geteld. Bovendien is er een datahiaat in de winter van 2007-2008. Dit verklaart de lage aantallen in deze periode (Figuur 10 3). Na een periode met hogere aantallen (2013-2017) was het aantal overwinterende watervogels op de Durme in de winter 2017/18 lager dan voorgaande jaren. 
+
+Op de __Dijle__ (Figuur 10 4) was de piek van vogelaantallen van korte duur. Terwijl gemiddeld in de periode 2007-2009 nog meer dan 1 200 watervogels per winter werden geteld, is het aantal de laatste drie jaar minder dan 100 per winter.
+
+
+```{r data-watervogels, warning=FALSE}
+
+data_watervogels <- read_delim("G:/Mijn Drive/INBODATA/PROJECTEN/PRJ_SCHELDE/VNSC/Projectgroep_Monitoring&Databeheer/Data_aanleveringen/2019/Watervogels_ZeescheldeZijrivieren_winter.csv", delim = ",") %>% 
+  select(-1)
+
+data_watervogels <- data_watervogels %>% 
+  mutate(maand = case_when(
+    Telling == "Januari" ~ "01",
+    Telling == "Februari" ~ "02",
+    Telling == "Maart" ~ "03",
+    Telling == "April" ~ "04",
+    Telling == "Mei" ~ "05",
+    Telling == "Juni" ~ "06",
+    Telling == "Juli" ~ "07",
+    Telling == "Augustus" ~ "08",
+    Telling == "September" ~ "09",
+    Telling == "Oktober" ~ "10",
+    Telling == "November" ~ "11",
+    Telling == "December" ~ "12"))
+
+data_watervogels <- data_watervogels %>% 
+    mutate(jaar = case_when(
+    maand %in% c("07", "08", "09", "10", "11", "12") ~ sapply(str_split(Telseizoen, "/"), function(x) x[1]),
+    TRUE ~ sapply(str_split(Telseizoen, "/"), function(x) as.character(as.numeric(x[1]) + 1))))
+
+data_watervogels <- data_watervogels %>% 
+    mutate(datum = paste(jaar, maand, "15", sep = "-"))
+
+```
+
+
+```{r 100-maandelijkse-totalen, fig.cap="De maandelijkse totalen van de watervogels langsheen de Zeeschelde sinds oktober 1991 tot **XXX** (exclusief zijrivieren).", fig.height=12/2.54, fig.width=18/2.54, warning=FALSE}
+
+data_watervogels %>% 
+  filter(str_detect(gebiedsgroep_code, "ZS")) %>% 
+  group_by(Telseizoen, Telling, datum) %>% 
+  summarise(som = sum(som)) %>% 
+  ungroup() %>% 
+  ggplot(aes(ymd(datum), som)) + 
+  geom_col() +
+  scale_x_date(date_breaks = "1 year", date_labels = "%Y") +
+  labs(x = "datum", y = "aantal") +
+  theme(axis.text.x = element_text(angle = 25))
+
+```
+
+
+```{r 100-verhouding-aantallen, fig.cap="De verhouding van de totale aantallen watervogels in de waterlichamen (winter 1991-**XXX**) (winterdata okt – mrt).", fig.height=12/2.54, fig.width=18/2.54, warning=FALSE}
+
+# figuur met gemiddelde over tellingen per seizoen en gebiedsgroep 
+data_watervogels %>% 
+  filter(maand %in% c("10", "11", "12", "01", "02", "03")) %>% 
+  group_by(Telseizoen, gebiedsgroep, rivier) %>% 
+  summarise(aantal = mean(som, na.rm = TRUE)) %>% 
+  ungroup() %>% 
+  group_by(Telseizoen, gebiedsgroep) %>% 
+  summarise(aantal = mean(aantal, na.rm = TRUE)) %>% 
+  ungroup() %>% 
+  ggplot(aes(ordered(Telseizoen), aantal, fill = gebiedsgroep)) + 
+  geom_col(position = "fill") +
+  scale_y_continuous(breaks = seq(0,1,0.1), labels = paste0(seq(0,100,10),"%")) +
+  labs(x = "telseizoen", y = "") +
+  theme(axis.text.x = element_text(angle = 25),
+        legend.position = "bottom",
+        legend.title = element_blank())
+
+
+# dit is de oorspronkelijke figuur met de som over alle tellingen 
+# data_watervogels %>% 
+#   filter(maand %in% c("10", "11", "12", "01", "02", "03")) %>% 
+#   group_by(Telseizoen, gebiedsgroep) %>% 
+#   summarise(aantal = sum(som, na.rm = TRUE)) %>% 
+#   ungroup() %>% 
+#   ggplot(aes(ordered(Telseizoen), aantal, fill = gebiedsgroep)) + 
+#   geom_col(position = "fill") +
+#   scale_y_continuous(breaks = seq(0,1,0.1), labels = paste0(seq(0,100,10),"%")) +
+#   labs(x = "telseizoen", y = "") +
+#   theme(axis.text.x = element_text(angle = 25))
+
+```
+
+
+```{r 100-aantallen-KRWzones, fig.cap="De wintervogelaantallen in de verschillende KRW-zones (**!gemiddelde!** per winter 1991/92 – **XXX**) Merk op: de schaal langs de y-as verschilt per waterlichaam.", fig.height=12/2.54, fig.width=18/2.54, warning=FALSE}
+
+# figuur met gemiddelde over tellingen per seizoen en gebiedsgroep 
+data_watervogels %>% 
+  filter(maand %in% c("10", "11", "12", "01", "02", "03")) %>% 
+  group_by(Telseizoen, gebiedsgroep, rivier) %>% 
+  summarise(aantal = mean(som, na.rm = TRUE)) %>% 
+  ungroup() %>% 
+  group_by(Telseizoen, gebiedsgroep) %>% 
+  summarise(aantal = mean(aantal, na.rm = TRUE)) %>% 
+  ungroup() %>% 
+  ggplot(aes(ordered(Telseizoen), aantal)) + 
+  geom_col() +
+  labs(x = "telseizoen", y = "aantal") +
+  facet_wrap(~gebiedsgroep) +
+  theme(axis.text.x = element_text(angle = 90))
+
+
+# dit is de oorspronkelijke figuur met de som over alle tellingen 
+# data_watervogels %>%
+#   filter(maand %in% c("10", "11", "12", "01", "02", "03")) %>%
+#   group_by(Telseizoen, gebiedsgroep) %>%
+#   summarise(aantal = sum(som, na.rm = TRUE)) %>%
+#   ungroup() %>%
+#   ggplot(aes(ordered(Telseizoen), aantal)) +
+#   geom_col() +
+#   labs(x = "telseizoen", y = "aantal") +
+#   facet_wrap(~gebiedsgroep, scales = "free_y") +
+#   theme(axis.text.x = element_text(angle = 90))
+
+```
+
+
+```{r 100-aantallen-zijrivieren, fig.cap="De wintervogelaantallen in de Dijle, Rupel en Zenne (gedeelte onder getijde-invloed) (**!gemiddelde!** per winter 1991/92 – **XXX**).", fig.height=8/2.54, fig.width=18/2.54, warning=FALSE}
+
+# figuur met gemiddelde over tellingen per seizoen en gebiedsgroep 
+data_watervogels %>% 
+  filter(maand %in% c("10", "11", "12", "01", "02", "03"),
+         rivier %in% c("Dijle", "Rupel", "Zenne")) %>% 
+  group_by(Telseizoen, rivier) %>% 
+  summarise(aantal = mean(som, na.rm = TRUE)) %>% 
+  ungroup() %>% 
+  ggplot(aes(ordered(Telseizoen), aantal)) + 
+  geom_col() +
+  labs(x = "telseizoen", y = "aantal") +
+  facet_wrap(~rivier) +
+  theme(axis.text.x = element_text(angle = 90))
+
+
+# dit is de oorspronkelijke figuur met de som over alle tellingen 
+# data_watervogels %>% 
+#   filter(maand %in% c("10", "11", "12", "01", "02", "03"),
+#          rivier %in% c("Dijle", "Rupel", "Zenne")) %>% 
+#   group_by(Telseizoen, rivier) %>% 
+#   summarise(aantal = sum(som, na.rm = TRUE)) %>% 
+#   ungroup() %>% 
+#   ggplot(aes(ordered(Telseizoen), aantal)) + 
+#   geom_col() +
+#   labs(x = "telseizoen", y = "aantal") +
+#   facet_wrap(~rivier, scales = "free_y") +
+#   theme(axis.text.x = element_text(angle = 90))
+
+```
+
+
+
+
+
+
+
+
