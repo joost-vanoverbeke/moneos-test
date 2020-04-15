@@ -6,7 +6,7 @@ __Gunther Van Ryckegem__
 ## Inleiding
 In dit hoofdstuk wordt op vraag van de projectgroep Monitoring en Databeheer een overzicht gegeven van de natuurontwikkelingsprojecten die reeds uitgevoerd zijn in de Zeeschelde, met weergave van de voornaamste karakteristieken van het gebied. Onderstaande informatie is beschikbaar gemaakt via het online portaal http://www.abpmer.net/omreg/. Deze website omvat een databank met uitgevoerde estuariene natuurontwikkelingsprojecten.
 
-Voor details over de uitvoering en de initiele evoluties in de ontpolderingen wordt verwezen naar @vandenneuckerEvaluatieVanNatuurontwikkelingsprojecten2007 en **XXX**. De evoluties in de GGG’s[^footnote-020-1] worden opgevolgd door Universiteit Antwerpen (**XXX**). In totaal werd er sinds 2003 ruim 450 ha aan estuariene natuurontwikkeling gerealiseerd (Tabel \@ref(tab:020-tabel-natuurontwikkelingsprojecten)).
+Voor details over de uitvoering en de initiele evoluties in de ontpolderingen wordt verwezen naar @vandenneuckerEvaluatieVanNatuurontwikkelingsprojecten2007 en @speybroeckEvaluatieVanNatuurontwikkelingsprojecten2011. De evoluties in de GGG’s[^footnote-020-1] worden opgevolgd door Universiteit Antwerpen [@marisOnderzoekNaarGevolgen2016]. In totaal werd er sinds 2003 ruim 450 ha aan estuariene natuurontwikkeling gerealiseerd (Tabel \@ref(tab:020-tabel-natuurontwikkelingsprojecten)).
 
 [^footnote-020-1]: Gecontroleerd Gereduceerd Getijdengebied
 
@@ -47,7 +47,7 @@ tabel_natuurontwikkelingsprojecten %>%
 ```
 
 
-
 ## Estuariene natuurontwikkeling Schelde-estuarium
 
 In 2017 werden enkele grote projecten gerealiseerd: KBR werd volledig functioneel met de opening van GGG Kruibeke, Kruibeke kreek en de ontpoldering van de Fasseitpolder. Ook de opening van het GGG Zennegat is een belangrijke realisatie nabij de monding van de Dijle en Zenne.
+

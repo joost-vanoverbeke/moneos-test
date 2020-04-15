@@ -15,7 +15,7 @@ De eerstelijnsrapportage beschrijft de aangeleverde watervogeldata van de Zeesch
 
 Beide fiches werden in één excel bestand aangeleverd: “DataMONEOSWatervogels-Zeeschelde_zijrivieren_totwinter2017.xlsx”
 
-De evaluatie heeft volgende informatie nodig: aantallen vogels per soort per maand per segment op niveau 2 en 3 (niveau 2 is som van de waterlichamen; niveau 3 heeft betrekking op het waterlichaam of de saliniteitszone) **XXX**. 
+De evaluatie heeft volgende informatie nodig: aantallen vogels per soort per maand per segment op niveau 2 en 3 (niveau 2 is som van de waterlichamen; niveau 3 heeft betrekking op het waterlichaam of de saliniteitszone) [@marisEvaluatiemethodiekScheldeestuariumUpdate2014]. 
 
 De dataset bevat volgende informatievelden: riviernaam, telseizoen, maand, jaar, krw, soort en aantal, waarbij:
 
