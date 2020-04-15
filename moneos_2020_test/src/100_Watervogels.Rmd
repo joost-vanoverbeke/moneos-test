@@ -15,7 +15,7 @@ De eerstelijnsrapportage beschrijft de aangeleverde watervogeldata van de Zeesch
 
 Beide fiches werden in één excel bestand aangeleverd: “DataMONEOSWatervogels-Zeeschelde_zijrivieren_totwinter2017.xlsx”
 
-De evaluatie heeft volgende informatie nodig: aantallen vogels per soort per maand per segment op niveau 2 en 3 (niveau 2 is som van de waterlichamen; niveau 3 heeft betrekking op het waterlichaam of de saliniteitszone) [@marisEvaluatiemethodiekScheldeestuariumUpdate2014]. 
+De evaluatie heeft volgende informatie nodig: aantallen vogels per soort per maand per segment op niveau 2 en 3 (niveau 2 is som van de waterlichamen; niveau 3 heeft betrekking op het waterlichaam of de saliniteitszone) **XXX**. 
 
 De dataset bevat volgende informatievelden: riviernaam, telseizoen, maand, jaar, krw, soort en aantal, waarbij:
 
@@ -54,6 +54,11 @@ _Ontbrekende data telseizoen 2017/18_:
 
 tabel_teltrajecten <- read_excel("../tabellen/100_Watervogels_tabellen.xlsx", 
     sheet = "teltrajecten", .name_repair = "minimal")
+
+# tabel_teltrajecten <- read_excel("~/moneos-test/moneos_2020_test/tabellen/100_Watervogels_tabellen.xlsx", 
+#     sheet = "teltrajecten", .name_repair = "minimal")
+
+options(knitr.kable.NA = '')
 
 tabel_teltrajecten[3,4] <- paste0(tabel_teltrajecten[3,4], 
                                 footnote_marker_number(1))
@@ -98,7 +103,7 @@ De trends in de  __Getijdedurme__ zijn enigszins moeilijker te interpreteren omd
 Op de __Dijle__ (Figuur 10 4) was de piek van vogelaantallen van korte duur. Terwijl gemiddeld in de periode 2007-2009 nog meer dan 1 200 watervogels per winter werden geteld, is het aantal de laatste drie jaar minder dan 100 per winter.
 
 
-```{r data-watervogels, warning=FALSE}
+```{r data-watervogels, warning=FALSE, message = FALSE}
 
 data_watervogels <- read_delim("G:/Mijn Drive/INBODATA/PROJECTEN/PRJ_SCHELDE/VNSC/Projectgroep_Monitoring&Databeheer/Data_aanleveringen/2019/Watervogels_ZeescheldeZijrivieren_winter.csv", delim = ",") %>% 
   select(-1)
@@ -129,7 +134,7 @@ data_watervogels <- data_watervogels %>%
 ```
 
 
-```{r 100-maandelijkse-totalen, fig.cap="De maandelijkse totalen van de watervogels langsheen de Zeeschelde sinds oktober 1991 tot **XXX** (exclusief zijrivieren).", fig.height=12/2.54, fig.width=18/2.54, warning=FALSE}
+```{r 100-figuur-maandelijkse-totalen, fig.cap="De maandelijkse totalen van de watervogels langsheen de Zeeschelde sinds oktober 1991 tot **XXX** (exclusief zijrivieren).", fig.height=12/2.54, fig.width=18/2.54, warning=FALSE}
 
 data_watervogels %>% 
   filter(str_detect(gebiedsgroep_code, "ZS")) %>% 
@@ -145,7 +150,7 @@ data_watervogels %>%
 ```
 
 
-```{r 100-verhouding-aantallen, fig.cap="De verhouding van de totale aantallen watervogels in de waterlichamen (winter 1991-**XXX**) (winterdata okt – mrt).", fig.height=12/2.54, fig.width=18/2.54, warning=FALSE}
+```{r 100-figuur-verhouding-aantallen, fig.cap="De verhouding van de totale aantallen watervogels in de waterlichamen (winter 1991-**XXX**) (winterdata okt – mrt).", fig.height=12/2.54, fig.width=18/2.54, warning=FALSE}
 
 # figuur met gemiddelde over tellingen per seizoen en gebiedsgroep 
 data_watervogels %>% 
@@ -180,7 +185,7 @@ data_watervogels %>%
 ```
 
 
-```{r 100-aantallen-KRWzones, fig.cap="De wintervogelaantallen in de verschillende KRW-zones (**!gemiddelde!** per winter 1991/92 – **XXX**) Merk op: de schaal langs de y-as verschilt per waterlichaam.", fig.height=12/2.54, fig.width=18/2.54, warning=FALSE}
+```{r 100-figuur-aantallen-KRWzones, fig.cap="De wintervogelaantallen in de verschillende KRW-zones (**!gemiddelde!** per winter 1991/92 – **XXX**) Merk op: de schaal langs de y-as verschilt per waterlichaam.", fig.height=12/2.54, fig.width=18/2.54, warning=FALSE}
 
 # figuur met gemiddelde over tellingen per seizoen en gebiedsgroep 
 data_watervogels %>% 
@@ -213,7 +218,7 @@ data_watervogels %>%
 ```
 
 
-```{r 100-aantallen-zijrivieren, fig.cap="De wintervogelaantallen in de Dijle, Rupel en Zenne (gedeelte onder getijde-invloed) (**!gemiddelde!** per winter 1991/92 – **XXX**).", fig.height=8/2.54, fig.width=18/2.54, warning=FALSE}
+```{r 100-figuur-aantallen-zijrivieren, fig.cap="De wintervogelaantallen in de Dijle, Rupel en Zenne (gedeelte onder getijde-invloed) (**!gemiddelde!** per winter 1991/92 – **XXX**).", fig.height=8/2.54, fig.width=18/2.54, warning=FALSE}
 
 # figuur met gemiddelde over tellingen per seizoen en gebiedsgroep 
 data_watervogels %>% 
