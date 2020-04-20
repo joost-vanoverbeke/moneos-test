@@ -35,6 +35,7 @@ editor_options:
 
 ```{r setup, include = FALSE}
 library(knitr)
+opts_knit$set(eval.after = "fig.cap")
 opts_chunk$set(
   echo = FALSE, 
   eval = TRUE,
@@ -43,8 +44,7 @@ opts_chunk$set(
   fig.height = 100 / 25.4,
   warning = TRUE,
   error = FALSE,
-  message = TRUE
-)
+  message = TRUE)
 library(kableExtra)
 library(tidyverse)
 library(ggpubr)
