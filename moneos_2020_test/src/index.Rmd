@@ -28,11 +28,14 @@ output:
   bookdown::epub_book:
     stylesheet: "css/inbo_rapport.css"
     template: !expr INBOmd::inbo_rapport_css("epub")
+editor_options: 
+  chunk_output_type: console
 ---
 
 
 ```{r setup, include = FALSE}
 library(knitr)
+opts_knit$set(eval.after = "fig.cap")
 opts_chunk$set(
   echo = FALSE, 
   eval = TRUE,
@@ -41,12 +44,12 @@ opts_chunk$set(
   fig.height = 100 / 25.4,
   warning = TRUE,
   error = FALSE,
-  message = TRUE
-)
+  message = TRUE)
 library(kableExtra)
 library(tidyverse)
 library(ggpubr)
 library(readxl)
+library(lubridate)
 library(INBOtheme)
 if (interactive()) {
   theme_set(
