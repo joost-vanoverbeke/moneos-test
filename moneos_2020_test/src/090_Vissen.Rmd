@@ -1,2 +1,22 @@
 
 # Vissen
+
+Fichenummer: FICHE S-DS-V-004a – Vissen (KRW) & S-DS-V-004b - Vissen (Vrijwilligersnetwerk)
+
+__Jan Breine__
+
+##	Inleiding
+
+De meeste vissen hebben een gevarieerde levenscyclus. Gedurende hun leven doorlopen ze verschillende niveaus in het voedselweb en bevolken ze diverse ecologische niches. Estuaria vervullen verschillende functies afhankelijk van het levensstadium waarin vissen zich bevinden. Veel vissoorten gebruiken estuaria als paaihabitat [@ableReexaminationFishEstuarine2005; @vandermeulenHabitatRequirementsSpawning2014]. De kinderkamerfunctie voor jonge vis werd uitgebreid toegelicht door [@elliottFishesEstuaries2008]. @maesModellingMigrationOpportunities2007, @maesPoorWaterQuality2008 en @stevensOnderzoekNaarTrekvissoorten2009 gaan dieper in op de functie van estuaria als doorgangszone voor trekvissen. Estuaria zijn voedselrijk en door de diversiteit aan habitats voorzien ze voedsel voor veel jonge en adulte vissen [@baldoaMultivariateApproachFeeding2002].
+
+Het bestuderen van de visfauna in de Zeeschelde is belangrijk om zicht te krijgen op de invulling van deze functies en om de ecologische ontwikkelingen op lange termijn in het gebied te volgen. De Zeeschelde verzamelt een belangrijk deel van de bovenstroomse vuilvrachten. Opvolging van de visstand in de Zeeschelde houdt dus ook een spiegel voor de kwaliteit van de bovenstroomse gebieden. De Europese Kaderrichtlijn Water (KRW, WFD, 2000; [@Directive2000602000]) verplicht om iedere zes jaar de ecologische toestand van oppervlaktewaterlichamen te rapporteren. Deze ecologische toestand moet beoordeeld worden met bio-indicatoren waaronder vissen. 
+
+De visgemeenschap in de Zeeschelde wordt jaarlijks onderzocht, niet alleen omwille van de dynamiek van het systeem maar ook om het herstel te evalueren na jarenlange plaatselijke en tijdelijke zuurstofloze condities [@marisBasiswaterkwaliteit2011]. Zesjaarlijkse afvissingen, het absolute minimum voor de KRW, geven te grote lacunes om dit herstelproces te documenteren. In het begin werd ook jaarlijks op de zijrivieren gevist om er de veranderingen in de visgemeenschap op de voet te volgen. Wegens gebrek aan personeel werd in 2012 beslist om dit naar driejaarlijks te verminderen. Om de seizoenale patronen te documenteren vissen we in drie verschillende seizoenen: lente, zomer en herfst.
+
+Sinds 2011 is er naast de reguliere fuikvisserij (gestart in 2002 [@maesOpvolgingVanHet2003]) ook ankerkuilvisserij in de Zeeschelde [@goudswaardKuilenSchietenHet2011]. Dat gebeurde in eerste instantie in Doel en Antwerpen. In 2012 voegden we er nog twee stroomopwaarts gelegen locaties, Steendorp en Branst, aan toe [@breineOpvolgingVanHet2013a] ter vervollediging van de saliniteitsgradient. Ankerkuilvisserij is goed toepasbaar in de waterkolom, fuikvisserij eerder nabij de bodem. Beide methodes zijn complementair en geven samen een vollediger beeld van de visgemeenschappen in de Zeeschelde voor de verschillende saliniteitszones. Bovenop de resultaten van het reguliere INBO meetnet krijgen we extra informatie uit de resultaten van een vrijwilligersmeetnet.
+
+INBO fuikvangstgegevens zijn beschikbaar via de VIS databank (https://vis.inbo.be) [@brosensVISDatabaseDistribution2015]. Vrijwilligersdata en ankerkuilgegevens worden momenteel nog afzonderlijk opgeslagen tot er een aanpassing kan gebeuren aan de databank. Alle data werden aangeleverd als xlsx-bestanden aan de Scheldemonitor.
+
+
+
+
