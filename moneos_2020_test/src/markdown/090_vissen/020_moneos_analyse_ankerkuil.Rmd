@@ -1,27 +1,17 @@
 ---
 title: "analyse visdata ankerkuil"
+knit: (function(inputFile, encoding) { 
+        rmarkdown::render(inputFile,
+                          encoding=encoding, 
+                          output_dir = "../../../output")})
 output: word_document
-output_dir: "../output"
-language:
-  label:
-    fig:    'Figuur '
-    tab:    'Tabel '
-    eq:     'Vergelijking '
-    thm:    'Theorema '
-    lem:    'Lemma '
-    def:    'Definitie '
-    cor:    'Gevolgtrekking '
-    prp:    'Bewering '
-    ex:     'Voorbeeld '
-    proof:  'Bewijs. '
-    remark: 'Opmerking. '
-bibliography: references.bib
-link-citations: TRUE
 ---
 
 
 ```{r setup, include=FALSE}
+
 knitr::opts_chunk$set(echo = FALSE, error=FALSE, warning=FALSE, message=FALSE, cache=FALSE)
+
 ```
 
 
@@ -34,21 +24,33 @@ library(INBOtheme)
 ```
 
 
+```{r pad}
+
+pad_data <- 
+  "G:/Mijn Drive/INBODATA/PROJECTEN/PRJ_SCHELDE/VNSC/Rapportage_INBO/2020/data/090_vissen/"
+
+pad_figuren <-
+  "../../../figuren/"
+
+pad_tabellen <-
+  "../../../tabellen/"
+
+```
+
+
 ##### datasets voor aantal en gewicht:
 
   - _C:/Users/joost_vanoverbeke/Documents/tmp_moneos/moneos_visdata/ankerkuil_aantallen_2012_2018.csv_
   - _C:/Users/joost_vanoverbeke/Documents/tmp_moneos/moneos_visdata/ankerkuil_gewicht_2012_2018.csv_
 
-[@aprahamianAlosaAlosaAlosa2003]
-
 ```{r inlezen-data}
 
 ankerkuil_aantal <- 
-  read_delim("ankerkuil_aantallen_2012_2018.csv",
+  read_delim(paste0(pad_data, "ankerkuil_aantallen_2012_2018.csv"),
              delim = ";")
 
 ankerkuil_gewicht <- 
-  read_delim("ankerkuil_gewicht_2012_2018.csv",
+  read_delim(paste0(pad_data, "ankerkuil_gewicht_2012_2018.csv"),
              delim = ";")
 
 data_ankerkuil <- 
@@ -151,9 +153,4 @@ aantal_soorten %>%
 
 ```
 
-
-
-
-
-# Referenties
 
