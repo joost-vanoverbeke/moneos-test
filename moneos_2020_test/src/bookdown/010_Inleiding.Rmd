@@ -132,7 +132,7 @@ Deze INBO MONEOS data is ook de basis voor de ecologische toestandsbepaling van 
 
 ```{r 010-tabel-indeling-schelde-estuarium}
 
-tabel_indeling_schelde_estuarium <- read_excel("../tabellen/010_Inleiding_tabellen.xlsx",
+tabel_indeling_schelde_estuarium <- read_excel(paste0(pad_tabellen, "010_Inleiding_tabellen.xlsx"),
     sheet = "indeling-schelde-estuarium2", .name_repair = "minimal")
 
 # tabel_indeling_schelde_estuarium <- read_excel("~/moneos-test/moneos_2020_test/tabellen/010_Inleiding_tabellen.xlsx",
@@ -163,7 +163,7 @@ tabel_indeling_schelde_estuarium %>%
 
 
 ```{r 010-figuur-waterlichamen, fig.cap = "Overzicht van de Kaderrichtlijn Water waterlichamen."}
-knitr::include_graphics("../figuren/010_Kaderrichtlijn_water_waterlichamen.jpg")
+knitr::include_graphics(paste0(pad_figuren, "010_Kaderrichtlijn_water_waterlichamen.jpg"))
 ```
 
 

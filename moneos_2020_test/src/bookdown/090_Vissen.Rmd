@@ -1,4 +1,33 @@
 
+
+
+```{r data-vissen, warning=FALSE, message=FALSE}
+
+# data_ankerkuil_aantal <- read_delim("~/tmp_moneos/overzicht ankerkuil 2018 aantal.csv",
+#                                     delim = ";") %>% 
+#   mutate(Datum = dmy(Datum)) %>% 
+#   filter(!is.na(Datum))
+# 
+# data_ankerkuil_gewicht <- read_delim("~/tmp_moneos/overzicht ankerkuil 2018 gewicht.csv",
+#                                     delim = ";") %>% 
+#   mutate(Datum = dmy(Datum)) %>% 
+#   filter(!is.na(Datum))
+# 
+
+
+# data_fuikvisserij_regulier_aantal <- read_xlsx("G:/Mijn Drive/INBODATA/PROJECTEN/PRJ_SCHELDE/VNSC/Projectgroep_Monitoring&Databeheer/Data_aanleveringen/2019/overzicht 2018 fuikvisserij reguliermeetnet.xlsx", 
+#                                                sheet = "aantal")
+# 
+# data_fuikvisserij_regulier_gewicht <- read_xlsx("G:/Mijn Drive/INBODATA/PROJECTEN/PRJ_SCHELDE/VNSC/Projectgroep_Monitoring&Databeheer/Data_aanleveringen/2019/overzicht 2018 fuikvisserij reguliermeetnet.xlsx", 
+#                                                sheet = "gewicht")
+
+# data_fuikvisserij_vrijwilligers
+
+
+
+```
+
+
 # Vissen
 
 Fichenummer: FICHE S-DS-V-004a – Vissen (KRW) & S-DS-V-004b - Vissen (Vrijwilligersnetwerk)

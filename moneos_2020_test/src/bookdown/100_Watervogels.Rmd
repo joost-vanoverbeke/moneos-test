@@ -118,7 +118,7 @@ _Ontbrekende data telseizoen 2017/18_:
 
 ```{r 100-tabel-teltrajecten}
 
-tabel_teltrajecten <- read_excel("../tabellen/100_Watervogels_tabellen.xlsx", 
+tabel_teltrajecten <- read_excel(paste0(pad_tabellen, "100_Watervogels_tabellen.xlsx"), 
     sheet = "teltrajecten", .name_repair = "minimal")
 
 # tabel_teltrajecten <- read_excel("~/moneos-test/moneos_2020_test/tabellen/100_Watervogels_tabellen.xlsx", 

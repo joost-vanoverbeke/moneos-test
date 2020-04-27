@@ -34,7 +34,7 @@ De fysiotoop fungeert als kleinste eenheid van informatie. De stalen van verschi
 
 ```{r 070-tabel-staalnamelocaties}
 
-tabel_staalnamelocaties <- read_excel("../tabellen/070_Macrobenthos_tabellen.xlsx", 
+tabel_staalnamelocaties <- read_excel(paste0(pad_tabellen, "070_Macrobenthos_tabellen.xlsx"), 
     sheet = "staalnamelocaties", .name_repair = "minimal")
 
 tabel_staalnamelocaties %>% 
@@ -216,7 +216,7 @@ Door de vastgestelde biomassawaarden (in g per m²) te vermenigvuldigen met de a
 
 ```{r 070-tabel-ecotopenkaarten}
 
-tabel_ecotopenkaarten <- read_excel("../tabellen/070_Macrobenthos_tabellen.xlsx", 
+tabel_ecotopenkaarten <- read_excel(paste0(pad_tabellen, "070_Macrobenthos_tabellen.xlsx"), 
     sheet = "ecotopenkaarten", .name_repair = "minimal")
 
 tabel_ecotopenkaarten %>% 
