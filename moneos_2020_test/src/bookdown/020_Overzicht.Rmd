@@ -13,7 +13,7 @@ Voor details over de uitvoering en de initiele evoluties in de ontpolderingen wo
 
 ```{r 020-tabel-natuurontwikkelingsprojecten}
 
-tabel_natuurontwikkelingsprojecten <- read_excel("../tabellen/020_Overzicht_tabellen.xlsx", 
+tabel_natuurontwikkelingsprojecten <- read_excel(paste0(pad_tabellen, "020_Overzicht_tabellen.xlsx"), 
     sheet = "natuurontwikkelingsprojecten", .name_repair = "minimal")
 
 # tabel_natuurontwikkelingsprojecten <- read_excel("~/moneos-test/moneos_2020_test/tabellen/020_Overzicht_tabellen.xlsx", 
