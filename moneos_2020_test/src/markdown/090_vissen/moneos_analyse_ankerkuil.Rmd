@@ -1,0 +1,159 @@
+---
+title: "analyse visdata ankerkuil"
+output: word_document
+output_dir: "../output"
+language:
+  label:
+    fig:    'Figuur '
+    tab:    'Tabel '
+    eq:     'Vergelijking '
+    thm:    'Theorema '
+    lem:    'Lemma '
+    def:    'Definitie '
+    cor:    'Gevolgtrekking '
+    prp:    'Bewering '
+    ex:     'Voorbeeld '
+    proof:  'Bewijs. '
+    remark: 'Opmerking. '
+bibliography: references.bib
+link-citations: TRUE
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, error=FALSE, warning=FALSE, message=FALSE, cache=FALSE)
+```
+
+
+```{r libraries}
+
+library(tidyverse)
+library(lubridate)
+library(INBOtheme)
+
+```
+
+
+##### datasets voor aantal en gewicht:
+
+  - _C:/Users/joost_vanoverbeke/Documents/tmp_moneos/moneos_visdata/ankerkuil_aantallen_2012_2018.csv_
+  - _C:/Users/joost_vanoverbeke/Documents/tmp_moneos/moneos_visdata/ankerkuil_gewicht_2012_2018.csv_
+
+[@aprahamianAlosaAlosaAlosa2003]
+
+```{r inlezen-data}
+
+ankerkuil_aantal <- 
+  read_delim("ankerkuil_aantallen_2012_2018.csv",
+             delim = ";")
+
+ankerkuil_gewicht <- 
+  read_delim("ankerkuil_gewicht_2012_2018.csv",
+             delim = ";")
+
+data_ankerkuil <- 
+  ankerkuil_aantal %>% 
+  gather(soort, aantal, `tiendoornige stekelbaars`:last_col()) %>% 
+  left_join(ankerkuil_gewicht %>% 
+              select(-uren, -volume) %>% 
+              gather(soort, gewicht, `tiendoornige stekelbaars`:last_col())) %>% 
+  mutate(seizoen = recode(seizoen,
+                          VJ = "voorjaar",
+                          NJ = "najaar",
+                          Z = "zomer"))
+
+laatste_jaar <-
+  data_ankerkuil %>% 
+  pull(jaar) %>% 
+  max()
+
+```
+
+
+```{r enkel-vissen}
+
+soorten <- 
+  data_ankerkuil %>% 
+  distinct(soort) %>% 
+  pull(soort)
+
+soorten_invertebraten <-
+  c("wolhandkrab", "grijze garnalen", "steurgarnalen", "gammarus", "noordzeekrab", "japanse steurgarnaal", "penseelkrab")
+
+soorten_vis <-
+  setdiff(soorten, soorten_invertebraten)
+
+data_ankerkuil <- 
+  data_ankerkuil %>% 
+  filter(soort %in% soorten_vis)
+
+```
+
+
+```{r aantal-en-gewicht-per-kub}
+
+data_ankerkuil <- 
+  data_ankerkuil %>% 
+  mutate(aantal_per_kub = aantal/volume,
+         gewicht_per_kub = gewicht/volume)
+
+```
+
+
+```{r relatie-aantal-gewicht, fig.cap="relatie aantal - gewicht", fig.height=14, fig.width=10}
+
+# data_ankerkuil %>%
+#   ggplot(aes(aantal, gewicht)) +
+#   geom_point() +
+#   geom_smooth(span = 10, se = FALSE) +
+#   facet_wrap(~soort,
+#              scales = "free",
+#              ncol = 5)
+
+data_ankerkuil %>% 
+  ggplot(aes(aantal + 1, gewicht + 1)) +
+  geom_point() +
+  geom_smooth(span = 10, se = FALSE) +
+  scale_x_log10(breaks = c(0,1,10,100,1000,10000,100000,1000000,10000000) + 1, labels = function(x) x-1) +
+  scale_y_log10(breaks = c(0,1,10,100,1000,10000,100000,1000000,10000000) + 1, labels = function(x) x-1) +
+  labs(x = "aantal",
+       y = "gewicht") +
+  facet_wrap(~soort, 
+             scales = "free",
+             ncol = 5)
+
+```
+
+
+```{r aantal-soorten, fig.cap="aantal soorten", fig.height=4, fig.width=8}
+
+aantal_soorten <- 
+  data_ankerkuil %>% 
+  filter(aantal > 0) %>% 
+  distinct(jaar, seizoen, soort) %>% 
+  count(jaar, seizoen, name = "soorten") %>% 
+  bind_rows(data_ankerkuil %>% 
+              filter(aantal > 0) %>% 
+              distinct(jaar, soort) %>% 
+              count(jaar, name = "soorten") %>% 
+              mutate(seizoen = "totaal")) %>% 
+  mutate(seizoen = factor(seizoen, levels = c("voorjaar", "zomer", "najaar", "totaal")))
+
+aantal_soorten %>% 
+  ggplot(aes(seizoen, soorten, fill = ordered(jaar))) +
+  geom_col(position = position_dodge(width = 0.925), 
+           alpha = 0.8) +
+  geom_text(aes(y = soorten + 3, label = soorten), 
+            position = position_dodge(width = 0.925),
+            size = 3) +
+  labs(y = "aantal soorten",
+       fill = "jaar")
+
+```
+
+
+
+
+
+# Referenties
+
