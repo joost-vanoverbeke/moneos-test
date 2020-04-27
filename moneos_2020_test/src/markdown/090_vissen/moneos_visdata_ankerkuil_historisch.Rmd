@@ -251,10 +251,10 @@ knitr::kable(stalen)
 ```{r filenames}
 
 file_aantallen <-
-  paste0("ankerkuil_aantallen_", paste(jaar_range, collapse = "_"), ".csv")
+  paste0(pad_data, "ankerkuil_aantallen_", paste(jaar_range, collapse = "_"), ".csv")
 
 file_gewicht <-
-  paste0("ankerkuil_gewicht_", paste(jaar_range, collapse = "_"), ".csv")
+  paste0(pad_data, "ankerkuil_gewicht_", paste(jaar_range, collapse = "_"), ".csv")
 
 ```
 

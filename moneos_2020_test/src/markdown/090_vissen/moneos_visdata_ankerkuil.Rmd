@@ -1,10 +1,16 @@
 ---
 title: "visdata"
+knit: (function(inputFile, encoding) { 
+        rmarkdown::render(inputFile,
+                          encoding=encoding, 
+                          output_dir = "../../../output")})
 output: word_document
 ---
 
 ```{r setup, include=FALSE}
+
 knitr::opts_chunk$set(echo = FALSE, error=FALSE, warning=FALSE, message=FALSE, cache=FALSE)
+
 ```
 
 
@@ -15,6 +21,15 @@ library(lubridate)
 
 ```
 
+
+```{r pad}
+
+pad_data <- 
+  "G:/Mijn Drive/INBODATA/PROJECTEN/PRJ_SCHELDE/VNSC/Rapportage_INBO/2020/data/090_vissen/"
+
+```
+
+
 ##### datasets voor aantal en gewicht gebaseerd op:
 
   - _G:/Mijn Drive/INBODATA/PROJECTEN/PRJ_SCHELDE/VNSC/Projectgroep_Monitoring&Databeheer/Data_aanleveringen/2019/overzicht ankerkuil 2018.xlsx_
@@ -23,7 +38,7 @@ library(lubridate)
 ```{r inlezen-data}
 
 ankerkuil_aantal_recent <- 
-  read_delim("overzicht ankerkuil 2018 aantal.csv",
+  read_delim(paste0(pad_data, "overzicht ankerkuil 2018 aantal.csv"),
              delim = ";") %>%
   rename_all(tolower) %>% 
   select(datum, locatie = locatienummer, uren, volume,
@@ -32,7 +47,7 @@ ankerkuil_aantal_recent <-
   filter(datum != "niet gevist")
 
 ankerkuil_gewicht_recent <- 
-  read_delim("overzicht ankerkuil 2018 gewicht.csv",
+  read_delim(paste0(pad_data, "overzicht ankerkuil 2018 gewicht.csv"),
              delim = ";") %>%
   rename_all(tolower) %>% 
   select(datum, locatie = locatienummer, uren, volume,
@@ -43,11 +58,11 @@ ankerkuil_gewicht_recent <-
 
 
 ankerkuil_aantal_historisch <- 
-  read_delim("ankerkuil_aantallen_2012_2017.csv",
+  read_delim(paste0(pad_data, "ankerkuil_aantallen_2012_2017.csv"),
              delim = ";")
 
 ankerkuil_gewicht_historisch <- 
-  read_delim("ankerkuil_gewicht_2012_2017.csv",
+  read_delim(paste0(pad_data, "ankerkuil_gewicht_2012_2017.csv"),
              delim = ";")
 
 ```
@@ -377,10 +392,10 @@ locaties <-
 ```{r filenames}
 
 file_aantallen <-
-  paste0("ankerkuil_aantallen_", paste(jaar_range, collapse = "_"), ".csv")
+  paste0(pad_data, "ankerkuil_aantallen_", paste(jaar_range, collapse = "_"), ".csv")
 
 file_gewicht <-
-  paste0("ankerkuil_gewicht_", paste(jaar_range, collapse = "_"), ".csv")
+  paste0(pad_data, "ankerkuil_gewicht_", paste(jaar_range, collapse = "_"), ".csv")
 
 ```
 
