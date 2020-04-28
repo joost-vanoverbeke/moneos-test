@@ -6,7 +6,7 @@ knit: (function(inputFile, encoding) {
                           output_dir = "../../../output")})
 output:
   word_document: 
-    reference_docx: INBO_rapportsjabloon.dotx
+    reference_docx: ../INBO_rapportsjabloon.dotx
 language:
   label:
     fig:    'Figuur '

@@ -1,0 +1,37 @@
+---
+title: "analyse watervogels"
+knit: (function(inputFile, encoding) { 
+        rmarkdown::render(inputFile,
+                          encoding=encoding, 
+                          output_dir = "../../../output")})
+output: word_document
+---
+
+
+```{r setup, include=FALSE}
+
+knitr::opts_chunk$set(echo = FALSE, error=FALSE, warning=FALSE, message=FALSE, cache=FALSE)
+
+```
+
+
+```{r libraries}
+
+library(tidyverse)
+library(lubridate)
+library(INBOtheme)
+
+```
+
+
+```{r pad}
+
+# inlezen van variabelen
+# pad naar data : pad_data
+# pad naar tabellen : pad_tabellen
+# pad naar figuren : pad_figuren
+
+source("../pad.R")
+
+```
+

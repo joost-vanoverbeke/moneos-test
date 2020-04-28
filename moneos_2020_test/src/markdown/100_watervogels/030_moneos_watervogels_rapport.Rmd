@@ -1,0 +1,88 @@
+---
+title: "moneos hoofdstuk watervogels"
+knit: (function(inputFile, encoding) { 
+        rmarkdown::render(inputFile,
+                          encoding=encoding, 
+                          output_dir = "../../../output")})
+output:
+  word_document: 
+    reference_docx: ../INBO_rapportsjabloon.dotx
+language:
+  label:
+    fig:    'Figuur '
+    tab:    'Tabel '
+    eq:     'Vergelijking '
+    thm:    'Theorema '
+    lem:    'Lemma '
+    def:    'Definitie '
+    cor:    'Gevolgtrekking '
+    prp:    'Bewering '
+    ex:     'Voorbeeld '
+    proof:  'Bewijs. '
+    remark: 'Opmerking. '
+bibliography: references.bib
+link-citations: TRUE
+csl: ecology.csl
+---
+
+
+
+```{r setup, include=FALSE}
+
+knitr::opts_chunk$set(echo = FALSE, error=FALSE, warning=FALSE, message=FALSE, cache=FALSE)
+
+```
+
+
+```{r libraries}
+
+library(tidyverse)
+
+```
+
+
+```{r pad}
+
+
+# inlezen van variabelen
+# pad naar data : pad_data
+# pad naar tabellen : pad_tabellen
+# pad naar figuren : pad_figuren
+
+source("../pad.R")
+
+```
+
+
+# watervogels
+
+Fichenummer: FICHE S-DS-V-007a – Maandelijkse vogeltellingen
+
+Fichenummer: FICHE S-DS-V-007b – Vogeltellingen zijrivieren 
+
+__Gunther Van Ryckegem__
+
+## Inleiding
+
+Het voorkomen van watervogels kan indicatief zijn voor het estuarien ecosysteemfunctioneren. Aantalsveranderingen kunnen zowel door factoren van buiten (extern - klimaat, Europese populatietrends,…) als van binnen (intern) het estuarium gestuurd worden. Dit betekent dat trends steeds in een ruimer kader en met de nodige omzichtigheid geëvalueerd moeten worden. Interne factoren kunnen bijvoorbeeld een gewijzigd voedselaanbod, foerageerareaal of een gewijzigde verstoringinvloed zijn. 
+
+De eerstelijnsrapportage beschrijft de aangeleverde watervogeldata van de Zeeschelde en de zijrivieren met een focus op de verzamelde tellingen tot de winter van `r as.numeric(laatste_jaar) - 1` (eindigend in maart `r laatste_jaar`). De data werden gefilterd uit de Watervogeldatabank van het INBO.
+
+Beide fiches werden in één excel bestand aangeleverd: “DataMONEOSWatervogels-Zeeschelde_zijrivieren_totwinter**XXX**.xlsx”
+
+De evaluatie heeft volgende informatie nodig: aantallen vogels per soort per maand per segment op niveau 2 en 3 (niveau 2 is som van de waterlichamen; niveau 3 heeft betrekking op het waterlichaam of de saliniteitszone) [@marisEvaluatiemethodiekScheldeestuariumUpdate2014]. 
+
+De dataset bevat volgende informatievelden: riviernaam, telseizoen, maand, jaar, krw, soort en aantal, waarbij:
+
+- riviernaam: het naamveld van de rivier (Zeeschelde, Durme, Rupel, Zenne, Dijle)
+- telseizoen: een vogeltelseizoen loopt van juli jaar x tot juni jaar x+1. 
+- krw: indeling volgens Figuur \@ref(fig:**XXX**).
+- aantal: de aantallen omvatten de som van de getelde vogels per soort, per maand, per rivier en krwzone. 
+
+
+
+
+
+## Referenties  
+
+
