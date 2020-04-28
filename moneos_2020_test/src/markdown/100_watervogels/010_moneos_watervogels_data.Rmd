@@ -19,6 +19,8 @@ knitr::opts_chunk$set(echo = FALSE, error=FALSE, warning=FALSE, message=FALSE, c
 
 library(tidyverse)
 library(lubridate)
+# library(inborutils)
+library(DBI)
 
 ```
 
@@ -34,5 +36,75 @@ library(lubridate)
 source("../pad.R")
 
 ```
+
+
+```{r inlezen-vanuit-databank-watervogels}
+# verbinding via VPN
+# con <- connect_inbo_dbase("W0004_00_Waterbirds")
+
+# verbinding via Citrix eigen server 
+con <- dbConnect(odbc::odbc(), "inbo-sql08-prd.inbo.be",
+      database = "W0004_00_Waterbirds", # or your database of interest
+      username = "joost_vanoverbeke",
+      password = "Flap13rol",
+      trusted_connection = "Yes")
+
+my_connection <- DBI::dbConnect(odbc::odbc(),
+      driver = "SQL Server",
+      server = "inbo-sql07-prd.inbo.be", # or inbo-sql08-prd.inbo.be
+      port = 1433,
+      database = "D0021_00_userFlora", # or your database of interest
+      trusted_connection = "Yes")
+
+
+WaterbirdsBT <- dbGetQuery(con,
+"SELECT
+  SU.SurveyCode as ProjectCode
+, SU.SurveyNaam as Project
+, L.RegioWVCode as RegioCode
+, L.RegioWVNaam as Regio
+, L.LocationWVCode as GebiedsCode
+, L.LocationWVNaam as Gebied
+, SS.Seasonname as Telseizoen
+, E.EventCode as TellingCode
+, E.EventLabel as Telling
+, E.SortOrder as TellingSortOrder
+, S.sampleDate as Teldatum
+--, S.IceCoverCode as Ijsbedekking
+--, S.SnowCoverCode as Sneeuwbedekking
+, S.CoverageCode as Telvolledigheid
+, T.Commonname as NedNaam
+, T.scientificname as WetNaam
+, T.TaxonGroupCode
+, F.Taxoncount as Aantal
+
+FROM W0004_00_Waterbirds.FactAnalyseSetOccurrence F
+inner join W0004_00_Waterbirds.DimSurvey SU on SU.surveykey = F.surveykey
+inner join W0004_00_Waterbirds.DimLocationWV L on L.locationwvkey = F.locationwvkey
+inner join W0004_00_Waterbirds.DimSeason SS on SS.Seasonkey = F.seasonkey
+inner join W0004_00_Waterbirds.DimEvent E on E.eventkey = F.eventkey
+inner join W0004_00_Waterbirds.DimSample S on F.samplekey = S.samplekey
+inner join W0004_00_Waterbirds.DimTaxonWV T on T.taxonwvkey = F.taxonwvkey
+WHERE 1=1
+  AND S.samplestatus = 'CHECKED' /**alleen gevalideerde records**/
+  AND S.coveragecode not in ('-', 'N')  /**niet getelde tellingen zijn irrelevant**/
+  AND F.taxoncount > 0
+  AND F.Analysesetkey in (1) /**alleen boottellingen, i.e. uit ZSCH-analyseset**/
+--and SS.seasonname in ('2013/14','2014/15','2015/16','2016/17', '2017/18')
+--and T.isgoose = 1;")
+
+dbDisconnect(con)
+
+```
+
+
+```{r }
+
+WaterbirdsBT %>% write_csv("data-output/WaterbirdsBT.csv") # BT van boottellingen
+WaterbirdsBT  <-  read_csv("data-output/WaterbirdsBT.csv")
+
+```
+
+
 
 

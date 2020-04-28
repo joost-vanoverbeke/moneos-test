@@ -1,3 +1,4 @@
+
 library(tidyverse)
 library(INBOtheme)
 library(htmlwidgets)
@@ -10,6 +11,15 @@ library(RcppRoll)
 library(ggpubr)
 
 con <- connect_inbo_dbase("W0004_00_Waterbirds")
+
+con <- DBI::dbConnect(odbc::odbc(),
+                                driver = "SQL Server",
+                                server = "inbo-sql07-prd.inbo.be", # or inbo-sql08-prd.inbo.be
+                                port = 1433,
+                                database = "W0004_00_Waterbirds", # or your database of interest
+                                trusted_connection = "Yes")
+
+con <- dbConnect(odbc::odbc(), "watervogels")
 
 # Query Warehouse - Zeeschelde-analyseset
 #########################################
