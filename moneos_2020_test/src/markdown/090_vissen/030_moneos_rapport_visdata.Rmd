@@ -5,7 +5,7 @@ knit: (function(inputFile, encoding) {
                           encoding=encoding, 
                           output_dir = "../../../output")})
 output:
-  word_document: 
+  bookdown::word_document2:
     reference_docx: ../INBO_rapportsjabloon.dotx
 language:
   label:
@@ -30,6 +30,10 @@ csl: ecology.csl
 ```{r setup, include=FALSE}
 
 knitr::opts_chunk$set(echo = FALSE, error=FALSE, warning=FALSE, message=FALSE, cache=FALSE)
+knitr::opts_knit$set(eval.after = "fig.cap")
+
+  # word_document: 
+  #   reference_docx: ../INBO_rapportsjabloon.dotx
 
 ```
 
@@ -37,6 +41,11 @@ knitr::opts_chunk$set(echo = FALSE, error=FALSE, warning=FALSE, message=FALSE, c
 ```{r libraries}
 
 library(tidyverse)
+library(readxl)
+library(flextable)
+library(officer)
+
+library(INBOtheme)
 
 ```
 
@@ -50,6 +59,19 @@ library(tidyverse)
 # pad naar figuren : pad_figuren
 
 source("../pad.R")
+
+hoodstuk <- "090_vissen"
+pad_data <- maak_pad(hoodstuk, "data")
+pad_figuren <- maak_pad(hoodstuk, "figuren")
+pad_tabellen <- maak_pad(hoodstuk, "tabellen")
+
+```
+
+
+```{r periode}
+
+eerste_jaar <- 2012
+laatste_jaar <- 2018
 
 ```
 
@@ -73,7 +95,118 @@ Sinds 2011 is er naast de reguliere fuikvisserij (gestart in 2002 [@maesOpvolgin
 INBO fuikvangstgegevens zijn beschikbaar via de VIS databank (https://vis.inbo.be) [@brosensVISDatabaseDistribution2015]. Vrijwilligersdata en ankerkuilgegevens worden momenteel nog afzonderlijk opgeslagen tot er een aanpassing kan gebeuren aan de databank. Alle data werden aangeleverd als xlsx-bestanden aan de Scheldemonitor.
 
 
+## Materiaal en Methode
 
+de locaties bemonsterd met ankerkuil zijn weergegeven in Figuur \@ref(fig:090-figuur-locaties-ankerkuil).
+
+
+```{r 090-figuur-locaties-ankerkuil, fig.cap=cap_locaties_ankerkuil}
+
+cap_locaties_ankerkuil <- 
+  paste0("De met ankerkuil bemonsterde locaties in d Zeeschelde in de period ", 
+         eerste_jaar, 
+         " - ", 
+         laatste_jaar, 
+         ".")
+
+knitr::include_graphics(paste0(pad_figuren, "locaties_ankerkuil.jpg"))
+
+```
+
+
+## Resultaten
+
+Het totaal aantal gevangen soorten is weergegeven in Figuur \@ref(fig:090-figuur-aantal-soorten).
+
+```{r 090-figuur-aantal-soorten, fig.cap=cap_aantal_soorten}
+
+cap_aantal_soorten <-
+  paste0("Totaal aantal gevangen soorten per seizoen en per vangstcamapgne (", 
+         eerste_jaar, 
+         " - ", 
+         laatste_jaar, 
+         "), en het totaal aantal gevangen soorten per vangstcampagne in de Zeeschelde.")
+
+knitr::include_graphics(paste0(pad_figuren, "aantal_soorten.jpg"))
+
+```
+
+
+Een overzicht van de soorten gevangen in `r laatste_jaar` is weergegeven in Tabel \@ref(tab:090-tabel-overzicht-soorten).
+
+```{r 090-tabel-overzicht-soorten}
+
+tabel_gevangen_soorten <-
+  read_excel(paste0(pad_tabellen, "tabellen_vissen.xlsx"),
+             sheet = "gevangen_soorten")
+
+tabel_namen <-
+  tabel_gevangen_soorten %>%
+  names()
+
+typologie_gevangen_soorten <-
+  data_frame(col_keys = tabel_namen,
+             colB = tabel_namen %>%
+               str_remove("_Doel|_Antwerpen|_Steendorp|_Branst"),
+             colA = tabel_namen %>%
+               str_remove("voorjaar_|zomer_|najaar_") %>%
+               str_replace(c("Antwerpen", "Steendorp"), c("Antw.", "Steend.")))
+
+cap_overzicht_soorten <-
+  paste0("Table: (\\#tab:090-tabel-overzicht-soorten)",
+         "Overzicht van de vissoorten gevangen tijdens de ankerkuilcampagnes in de Zeeschelde in ",
+         laatste_jaar,
+         ".")
+
+tabel_gevangen_soorten %>%
+  # flextable(col_keys = c(tabel_namen[1], "sep_1", tabel_namen[2:5], "sep_2", tabel_namen[6:9], "sep_3", tabel_namen[10:13])) %>%
+  flextable() %>%
+  set_header_df(mapping = typologie_gevangen_soorten, key = "col_keys" ) %>%
+  merge_h(part = "header") %>%
+  merge_v(part = "header", j = 1:2) %>%
+  theme_booktabs() %>%
+  font(part = "all", fontname = "Calibri") %>%
+  fontsize(part = "all", size = 8) %>%
+  align(align = "center", part = "all") %>%
+  # vline(j = c("soort", "voorjaar_Branst", "zomer_Branst"), border = fp_border(), part = "all") %>%
+  vline(j = str_subset(tabel_namen, "soort|Branst"), border = fp_border(), part = "all") %>%
+  vline_left(border = fp_border(), part = "all") %>%
+  fix_border_issues() %>%
+  empty_blanks() %>%
+  autofit(add_w = .0) %>%
+  set_caption(cap_overzicht_soorten)
+
+```
+
+
+Het gemiddeld aantal individuen per m³ water is weergegeven in Figuur \@ref(fig:090-figuur-gemiddeld-seizoenen) en het relatief aantal gevangen individuen in Figuur \@ref(fig:090-figuur-relatief-gevangen).
+
+
+```{r 090-figuur-gemiddeld-seizoenen, fig.cap=cap_gemiddeld_seizoenen}
+
+cap_gemiddeld_seizoenen <- 
+  paste0("gemiddeld aantal individuen per m³ water gevangen in de Zeeschelde in de periode ", 
+         eerste_jaar, 
+         " - ", 
+         laatste_jaar, 
+         ".")
+
+knitr::include_graphics(paste0(pad_figuren, "gemiddeld_over_seizoenen.jpg"))
+
+```
+
+
+
+```{r 090-figuur-relatief-gevangen, fig.cap=cap_relatief_gevangen}
+
+cap_relatief_gevangen <- 
+  paste0("Het relatief aantal gevangen individuen in de Zeeschelde tijdens de ankerkuilcampagnes in het voorjaar, de zomer en het najaar van ", 
+         laatste_jaar, 
+         ".")
+
+knitr::include_graphics(paste0(pad_figuren, "relatief_aantal_gevangen_individuen.jpg"))
+
+```
 
 
 ## Referenties  
