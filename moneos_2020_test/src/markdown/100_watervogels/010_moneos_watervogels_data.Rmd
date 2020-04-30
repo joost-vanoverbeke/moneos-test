@@ -239,7 +239,7 @@ WaterbirdsBT <-
 ```
 
 
-```{r toevoegen-nultellingen, eval = 0}
+```{r toevoegen-nultellingen, eval=FALSE}
 
 WaterbirdsBT <- 
   WaterbirdsBT %>% 
