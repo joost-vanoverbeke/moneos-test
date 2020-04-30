@@ -35,6 +35,9 @@ library(DBI)
 
 source("../pad.R")
 
+hoodstuk <- "100_watervogels"
+pad_data <- maak_pad(hoodstuk, "data")
+
 ```
 
 
@@ -50,6 +53,17 @@ seizoenen <-
 seizoenen_query <-
   paste0("'", seizoenen, "'", collapse = ",") %>% 
   paste0("(", ., ")")
+
+```
+
+
+```{r gebiedsgroepen}
+
+gebiedsgroepen <- 
+  read_delim(paste0(pad_data, "Zeeschelde_gebiedsgroepen.csv"),
+             delim = ";") %>% 
+  filter(gebiedsgroeptype_code == "KRWZS") %>% 
+  mutate(gebiedscode = as.character(gebiedscode))
 
 ```
 
@@ -108,14 +122,15 @@ WaterbirdsBT <-
              query)
 dbDisconnect(con)
 
+# selectie van de telgebieden gespecifieerd in de Zeeschelde_gebiedsgroepen - KRWZS
+WaterbirdsBT <-
+  WaterbirdsBT %>% 
+  filter(GebiedsCode %in% gebiedsgroepen$gebiedscode)
+
 ```
 
 
 ```{r toevoegen-warehouse-MIDMA-analyseset-zijrivieren}
-
-gebiedsgroepen <- 
-  read_delim("//Client/G$/Mijn Drive/INBODATA/PROJECTEN/PRJ_SCHELDE/VNSC/Rapportage_INBO/2020/100_watervogels/data/Zeeschelde_gebiedsgroepen.csv",
-             delim = ";")
 
 telzones_zijrivieren <- 
   gebiedsgroepen$gebiedscode %>% 
@@ -171,7 +186,8 @@ WaterbirdsBT <-
 WaterbirdsBT %>% 
   filter(str_detect(Gebied, "aapskooi|Oude Dijle")) %>% 
   group_by(Gebied) %>% 
-  summarise()
+  summarise() %>% 
+  ungroup()
 
 # Correctie
 WaterbirdsBT <- 
@@ -184,10 +200,61 @@ WaterbirdsBT <-
 ```
 
 
-```{r }
+```{r toevoegen-informatie-gebiedsgroepen}
 
-# WaterbirdsBT %>% write_csv("data-output/WaterbirdsBT.csv") # BT van boottellingen
-# WaterbirdsBT  <-  read_csv("data-output/WaterbirdsBT.csv")
+WaterbirdsBT <- 
+  WaterbirdsBT %>% 
+  rename_all(tolower) %>% 
+  left_join(gebiedsgroepen) %>% 
+  select(gebiedsgroep_code,
+         gebiedsgroep,
+         rivier,
+         gebiedscode,
+         gebied = gebiedsnaam,
+         telseizoen,
+         teldatum,
+         nednaam,
+         wetnaam,
+         taxongroepcode = taxongroupcode,
+         aantal)
+
+```
+
+
+```{r optellen-per-gebiedsgroep-rivier}
+
+WaterbirdsBT <- 
+  WaterbirdsBT %>% 
+  group_by(gebiedsgroep_code,
+           gebiedsgroep,
+           rivier,
+           telseizoen,
+           teldatum,
+           nednaam,
+           wetnaam,
+           taxongroepcode) %>% 
+  summarise(aantal = sum(aantal)) %>% 
+  ungroup()
+
+```
+
+
+```{r toevoegen-nultellingen, eval = 0}
+
+WaterbirdsBT <- 
+  WaterbirdsBT %>% 
+  complete(nesting(gebiedsgroep_code, gebiedsgroep, rivier, telseizoen, teldatum),
+           nesting(nednaam, wetnaam, taxongroepcode),
+           fill = list(0))
+
+```
+
+
+```{r wegschrijven-data}
+
+WaterbirdsBT %>% 
+  write_delim(paste0(pad_data, "Watervogels_Zeeschelde.csv"),
+              delim = ";")
 
 ```
 
