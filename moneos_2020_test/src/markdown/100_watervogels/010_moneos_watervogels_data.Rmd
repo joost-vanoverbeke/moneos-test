@@ -19,7 +19,7 @@ knitr::opts_chunk$set(echo = FALSE, error=FALSE, warning=FALSE, message=FALSE, c
 
 library(tidyverse)
 library(lubridate)
-# library(inborutils)
+library(inborutils)
 library(DBI)
 
 ```
@@ -38,26 +38,26 @@ source("../pad.R")
 ```
 
 
-```{r inlezen-vanuit-databank-watervogels}
-# verbinding via VPN
-# con <- connect_inbo_dbase("W0004_00_Waterbirds")
+```{r benodigde-seizoenen}
 
-# verbinding via Citrix eigen server 
-con <- dbConnect(odbc::odbc(), "inbo-sql08-prd.inbo.be",
-      database = "W0004_00_Waterbirds", # or your database of interest
-      username = "joost_vanoverbeke",
-      password = "Flap13rol",
-      trusted_connection = "Yes")
+vroegste_seizoen <- "1991/1992"
+laatste_seizoen <- "2018/19"
 
-my_connection <- DBI::dbConnect(odbc::odbc(),
-      driver = "SQL Server",
-      server = "inbo-sql07-prd.inbo.be", # or inbo-sql08-prd.inbo.be
-      port = 1433,
-      database = "D0021_00_userFlora", # or your database of interest
-      trusted_connection = "Yes")
+seizoenen <-
+  (vroegste_seizoen %>% str_sub(0, 4) %>% as.numeric):(laatste_seizoen %>% str_sub(0, 4) %>% as.numeric) %>% 
+  paste(., {.+1} %>% as.character() %>% str_sub(3, 5), sep = "/")
+
+seizoenen_query <-
+  paste0("'", seizoenen, "'", collapse = ",") %>% 
+  paste0("(", ., ")")
+
+```
 
 
-WaterbirdsBT <- dbGetQuery(con,
+```{r basis-query}
+
+basis_query <- 
+  paste0(
 "SELECT
   SU.SurveyCode as ProjectCode
 , SU.SurveyNaam as Project
@@ -70,38 +70,124 @@ WaterbirdsBT <- dbGetQuery(con,
 , E.EventLabel as Telling
 , E.SortOrder as TellingSortOrder
 , S.sampleDate as Teldatum
---, S.IceCoverCode as Ijsbedekking
---, S.SnowCoverCode as Sneeuwbedekking
 , S.CoverageCode as Telvolledigheid
 , T.Commonname as NedNaam
 , T.scientificname as WetNaam
 , T.TaxonGroupCode
 , F.Taxoncount as Aantal
 
-FROM W0004_00_Waterbirds.FactAnalyseSetOccurrence F
-inner join W0004_00_Waterbirds.DimSurvey SU on SU.surveykey = F.surveykey
-inner join W0004_00_Waterbirds.DimLocationWV L on L.locationwvkey = F.locationwvkey
-inner join W0004_00_Waterbirds.DimSeason SS on SS.Seasonkey = F.seasonkey
-inner join W0004_00_Waterbirds.DimEvent E on E.eventkey = F.eventkey
-inner join W0004_00_Waterbirds.DimSample S on F.samplekey = S.samplekey
-inner join W0004_00_Waterbirds.DimTaxonWV T on T.taxonwvkey = F.taxonwvkey
+FROM FactAnalyseSetOccurrence F
+inner join DimSurvey SU on SU.surveykey = F.surveykey
+inner join DimLocationWV L on L.locationwvkey = F.locationwvkey
+inner join DimSeason SS on SS.Seasonkey = F.seasonkey
+inner join DimEvent E on E.eventkey = F.eventkey
+inner join DimSample S on F.samplekey = S.samplekey
+inner join DimTaxonWV T on T.taxonwvkey = F.taxonwvkey
 WHERE 1=1
   AND S.samplestatus = 'CHECKED' /**alleen gevalideerde records**/
   AND S.coveragecode not in ('-', 'N')  /**niet getelde tellingen zijn irrelevant**/
-  AND F.taxoncount > 0
-  AND F.Analysesetkey in (1) /**alleen boottellingen, i.e. uit ZSCH-analyseset**/
---and SS.seasonname in ('2013/14','2014/15','2015/16','2016/17', '2017/18')
---and T.isgoose = 1;")
+  AND F.taxoncount > 0;"
+  )
 
+```
+
+
+```{r bevragen-warehouse-zeeschelde-analyseset}
+
+query <-
+  paste0(str_sub(basis_query, end=-2),
+         " AND F.Analysesetkey in (1) /**alleen midmaandelijkse tellingen, i.e. uit MIDMA-analysesets**/",
+         " AND SS.seasonname in ",
+         seizoenen_query,
+         ";"
+  )
+
+con <- connect_inbo_dbase("W0004_00_Waterbirds")
+WaterbirdsBT <- 
+  dbGetQuery(con,
+             query)
 dbDisconnect(con)
+
+```
+
+
+```{r toevoegen-warehouse-MIDMA-analyseset-zijrivieren}
+
+gebiedsgroepen <- 
+  read_delim("//Client/G$/Mijn Drive/INBODATA/PROJECTEN/PRJ_SCHELDE/VNSC/Rapportage_INBO/2020/100_watervogels/data/Zeeschelde_gebiedsgroepen.csv",
+             delim = ";")
+
+telzones_zijrivieren <- 
+  gebiedsgroepen$gebiedscode %>% 
+  unique() %>% 
+  setdiff(WaterbirdsBT$GebiedsCode %>% 
+            unique())
+
+telzones_query <-
+  paste0("'", telzones_zijrivieren, "'", collapse = ",") %>% 
+  paste0("(", ., ")")
+
+query <-
+  paste0(str_sub(basis_query, end=-2),
+         " AND F.Analysesetkey in (2, 3, 4) /**alleen boottellingen, i.e. uit ZSCH-analyseset**/",
+         " AND SS.seasonname in ",
+         seizoenen_query,
+         " AND L.LocationWVCode in ",
+         telzones_query,
+         ";"
+  )
+
+con <- connect_inbo_dbase("W0004_00_Waterbirds")
+waterbirds_zijrivieren <- 
+  dbGetQuery(con,
+             query)
+dbDisconnect(con)
+
+WaterbirdsBT <-
+  WaterbirdsBT %>% 
+  bind_rows(waterbirds_zijrivieren)
+
+```
+
+
+```{r correcties-WaterbirdsBT}
+
+# checken voor dubbels in de dataset
+WaterbirdsBT  %>% 
+  group_by_at(vars(-Aantal)) %>% 
+  mutate(n = n()) %>% 
+  ungroup() %>% 
+  filter(n>1) %>% 
+  arrange(Gebied, Telseizoen, Telling, Teldatum, NedNaam, ProjectCode)
+
+# Correctie hiervoor
+WaterbirdsBT <- 
+  WaterbirdsBT  %>% 
+  group_by_at(vars(-Aantal)) %>% 
+  summarise(Aantal = max(Aantal)) %>% # maximum van de dubbele tellingen
+  ungroup()
+
+# Twee gebieden in dataset die er niet thuishoren: 
+WaterbirdsBT %>% 
+  filter(str_detect(Gebied, "aapskooi|Oude Dijle")) %>% 
+  group_by(Gebied) %>% 
+  summarise()
+
+# Correctie
+WaterbirdsBT <- 
+  WaterbirdsBT %>% 
+  filter(!str_detect(Gebied, "aapskooi|Oude Dijle"))
+
+# # Enkel wintertellingen
+# WaterbirdsBTw <- WaterbirdsBT %>% filter(month(Teldatum) %in% c(10, 11, 12, 1, 2, 3))
 
 ```
 
 
 ```{r }
 
-WaterbirdsBT %>% write_csv("data-output/WaterbirdsBT.csv") # BT van boottellingen
-WaterbirdsBT  <-  read_csv("data-output/WaterbirdsBT.csv")
+# WaterbirdsBT %>% write_csv("data-output/WaterbirdsBT.csv") # BT van boottellingen
+# WaterbirdsBT  <-  read_csv("data-output/WaterbirdsBT.csv")
 
 ```
 
