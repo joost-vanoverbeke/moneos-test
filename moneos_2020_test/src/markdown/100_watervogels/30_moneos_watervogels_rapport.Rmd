@@ -37,8 +37,8 @@ library(kableExtra)
 # library(huxtable)
 # library(pander)
 # library(ztable)
-library(magick)
-library(webshot)
+# library(magick)
+# library(webshot)
 
 ```
 

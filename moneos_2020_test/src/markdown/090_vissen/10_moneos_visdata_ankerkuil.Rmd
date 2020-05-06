@@ -1,9 +1,15 @@
 ---
-title: "visdata"
-knit: (function(inputFile, encoding) { 
+params:
+  hoofdstuk: "090_vissen"
+knit: (function(inputFile, encoding) {
         rmarkdown::render(inputFile,
-                          encoding=encoding, 
-                          output_dir = "../../../output")})
+                          encoding=encoding,
+                          output_dir = {
+                            source("../pad.R");
+                            maak_pad(rmarkdown::yaml_front_matter(inputFile)$params$hoofdstuk, "output")
+                          }
+                          )})
+title: "visdata"
 output: word_document
 ---
 
@@ -25,13 +31,16 @@ library(lubridate)
 
 ```{r pad}
 
-
 # inlezen van variabelen
 # pad naar data : pad_data
 # pad naar tabellen : pad_tabellen
 # pad naar figuren : pad_figuren
 
 source("../pad.R")
+
+pad_data <- maak_pad(params$hoofdstuk, "data")
+pad_figuren <- maak_pad(params$hoofdstuk, "figuren")
+pad_tabellen <- maak_pad(params$hoofdstuk, "tabellen")
 
 ```
 

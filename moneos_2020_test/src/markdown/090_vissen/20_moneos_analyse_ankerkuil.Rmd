@@ -1,9 +1,15 @@
 ---
-title: "analyse visdata ankerkuil"
-knit: (function(inputFile, encoding) { 
+params:
+  hoofdstuk: "090_vissen"
+knit: (function(inputFile, encoding) {
         rmarkdown::render(inputFile,
-                          encoding=encoding, 
-                          output_dir = "../../../output")})
+                          encoding=encoding,
+                          output_dir = {
+                            source("../pad.R");
+                            maak_pad(rmarkdown::yaml_front_matter(inputFile)$params$hoofdstuk, "output")
+                          }
+                          )})
+title: "analyse visdata ankerkuil"
 output: word_document
 ---
 
@@ -37,10 +43,9 @@ library(INBOtheme)
 
 source("../pad.R")
 
-hoodstuk <- "090_vissen"
-pad_data <- maak_pad(hoodstuk, "data")
-pad_figuren <- maak_pad(hoodstuk, "figuren")
-pad_tabellen <- maak_pad(hoodstuk, "tabellen")
+pad_data <- maak_pad(params$hoofdstuk, "data")
+pad_figuren <- maak_pad(params$hoofdstuk, "figuren")
+pad_tabellen <- maak_pad(params$hoofdstuk, "tabellen")
 
 ```
 

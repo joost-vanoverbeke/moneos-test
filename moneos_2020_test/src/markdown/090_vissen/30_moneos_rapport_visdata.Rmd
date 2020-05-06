@@ -1,18 +1,25 @@
 ---
-params:
-  hoofdstuk: "090_vissen"
-knit: (function(inputFile, encoding) {
-        rmarkdown::render(inputFile,
-                          encoding=encoding,
-                          output_dir = {
-                            source("../pad.R");
-                            maak_pad(rmarkdown::yaml_front_matter(inputFile)$params$hoofdstuk, "output")
-                          }
-                          )})
 title: "moneos hoofdstuk vissen"
+knit: (function(inputFile, encoding) { 
+        rmarkdown::render(inputFile,
+                          encoding=encoding, 
+                          output_dir = "../../../output")})
 output:
   bookdown::word_document2:
-    reference_docx: ../INBO_sjabloon.docx
+    reference_docx: ../INBO_rapportsjabloon.dotx
+language:
+  label:
+    fig:    'Figuur '
+    tab:    'Tabel '
+    eq:     'Vergelijking '
+    thm:    'Theorema '
+    lem:    'Lemma '
+    def:    'Definitie '
+    cor:    'Gevolgtrekking '
+    prp:    'Bewering '
+    ex:     'Voorbeeld '
+    proof:  'Bewijs. '
+    remark: 'Opmerking. '
 bibliography: references.bib
 link-citations: TRUE
 csl: ../ecology.csl
@@ -34,7 +41,6 @@ library(tidyverse)
 library(readxl)
 library(flextable)
 library(officer)
-# library(kableExtra)
 
 library(INBOtheme)
 
@@ -43,6 +49,7 @@ library(INBOtheme)
 
 ```{r pad}
 
+
 # inlezen van variabelen
 # pad naar data : pad_data
 # pad naar tabellen : pad_tabellen
@@ -50,9 +57,10 @@ library(INBOtheme)
 
 source("../pad.R")
 
-pad_data <- maak_pad(params$hoofdstuk, "data")
-pad_figuren <- maak_pad(params$hoofdstuk, "figuren")
-pad_tabellen <- maak_pad(params$hoofdstuk, "tabellen")
+hoodstuk <- "090_vissen"
+pad_data <- maak_pad(hoodstuk, "data")
+pad_figuren <- maak_pad(hoodstuk, "figuren")
+pad_tabellen <- maak_pad(hoodstuk, "tabellen")
 
 ```
 
