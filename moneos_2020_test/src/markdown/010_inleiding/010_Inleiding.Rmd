@@ -9,7 +9,7 @@ knit: (function(inputFile, encoding) {
                             maak_pad(rmarkdown::yaml_front_matter(inputFile)$params$hoofdstuk, "output")
                           }
                           )})
-title: "moneos hoofdstuk watervogels"
+title: "moneos inleiding"
 output:
   bookdown::word_document2:
     reference_docx: ../INBO_sjabloon.docx
@@ -52,7 +52,7 @@ pad_tabellen <- maak_pad(params$hoofdstuk, "tabellen")
 ```
 
 
-# Dankwoord/Voorwoord {-}
+# Dankwoord/Voorwoord {-}  
 
 Het INBO monitoringsprogramma wordt uitgevoerd met de financiële steun van Waterwegen en Zeekanaal (W&Z) afdeling Zeeschelde, afdeling Maritime Toegang (aMT) en van het Agentschap voor Natuur en Bos (ANB).
 De monitoring zou niet mogelijk geweest zijn zonder de bemanning van de schepen SCALDIS I, Scheldewacht II, Veremans en de Parel. Waarvoor dank.
@@ -73,7 +73,7 @@ De zeer gedreven vrijwilligers zijn we opnieuw zeer erkentelijk voor het aanleve
 De vrijwilligers in 2017 waren (in stroomopwaartse richting): Gie De Beuckelaer, Ludo Declerck, Myriam De Proost, Georges Hofer, Walter Van Ginhoven, Hugo Van Beek, Hubert Dewilde, Mark Staut, Anna Schneider, Marc Deckers, Swa Branders, Marc Van den Neucker, Tom Van den Neucker, François Van den Broeck, Bart Bonte, Serge Loverie en Carl Van den Bogaert.
 
 
-# Samenvatting {-}
+# Samenvatting {-}  
 
 In 2017 werden verscheidene nieuwe estuariene gebieden gerealiseerd in het kader van het geacutaliseerde SIGMAplan.
 Het gecontroleerd gereduceerd getijdengebied (GGG) van Kruibeke, de aantakking van de Kruibeekse kreek en de ontpoldering van de Fasseitpolder waren een feit.
@@ -211,7 +211,6 @@ tabel_indeling_schelde_estuarium <-
              cell_spec(color = "black"), 
            escape = FALSE,
            threeparttable = TRUE) %>%
-  # as_image("~/100-tabel-teltrajecten.jpeg")
   save_kable("010-tabel-indeling-schelde-estuarium.png")
 
 knitr::include_graphics("010-tabel-indeling-schelde-estuarium.png")
