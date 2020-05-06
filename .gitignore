@@ -47,3 +47,9 @@ css/
 output/
 _bookdown_files/
 
+# png files
+*.png
+
+# exe files
+*.exe
+

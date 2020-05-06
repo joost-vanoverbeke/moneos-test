@@ -1,10 +1,17 @@
 ---
-title: "watervogeldata"
-knit: (function(inputFile, encoding) { 
+params:
+  hoofdstuk: "100_watervogels"
+knit: (function(inputFile, encoding) {
         rmarkdown::render(inputFile,
-                          encoding=encoding, 
-                          output_dir = "../../../output")})
-output: word_document
+                          encoding=encoding,
+                          output_dir = {
+                            source("../pad.R");
+                            maak_pad(rmarkdown::yaml_front_matter(inputFile)$params$hoofdstuk, "output")
+                          }
+                          )})
+title: "watervogeldata"
+output:
+  bookdown::word_document2
 ---
 
 
@@ -27,7 +34,6 @@ library(DBI)
 
 ```{r pad}
 
-
 # inlezen van variabelen
 # pad naar data : pad_data
 # pad naar tabellen : pad_tabellen
@@ -35,8 +41,9 @@ library(DBI)
 
 source("../pad.R")
 
-hoodstuk <- "100_watervogels"
-pad_data <- maak_pad(hoodstuk, "data")
+pad_data <- maak_pad(params$hoofdstuk, "data")
+pad_figuren <- maak_pad(params$hoofdstuk, "figuren")
+pad_tabellen <- maak_pad(params$hoofdstuk, "tabellen")
 
 ```
 

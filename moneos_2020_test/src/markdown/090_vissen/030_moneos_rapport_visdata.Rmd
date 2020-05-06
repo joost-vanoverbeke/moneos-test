@@ -22,7 +22,7 @@ language:
     remark: 'Opmerking. '
 bibliography: references.bib
 link-citations: TRUE
-csl: ecology.csl
+csl: ../ecology.csl
 ---
 
 
@@ -31,9 +31,6 @@ csl: ecology.csl
 
 knitr::opts_chunk$set(echo = FALSE, error=FALSE, warning=FALSE, message=FALSE, cache=FALSE)
 knitr::opts_knit$set(eval.after = "fig.cap")
-
-  # word_document: 
-  #   reference_docx: ../INBO_rapportsjabloon.dotx
 
 ```
 
