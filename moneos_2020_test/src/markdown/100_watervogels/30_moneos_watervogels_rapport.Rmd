@@ -142,15 +142,12 @@ knitr::kable(NULL, caption = cap_teltrajecten)
 
 footnote_text <- "Opgelet dit teltraject omvat data van zowel de getijgebonden Durme als van de afgesneden ‘oude’ Durme-arm. Sinds oktober 2012 wordt de getijgebonden Durme afzonderlijk geteld."
 
-tabel_teltrajecten <- 
-  tabel_teltrajecten %>%
+tabel_teltrajecten %>%
   mutate_all(~replace_na(., "")) %>% 
   mutate_all(~cell_spec(., color = "black")) %>% 
   {.[3,4] <- paste0(.[3,4],
                     footnote_marker_number(1))
-  .}
-
-tabel_teltrajecten %>%
+  .} %>%
   knitr::kable(
     # caption = cap_teltrajecten,
                # "html",
@@ -206,11 +203,11 @@ knitr::include_graphics("100-tabel-teltrajecten.png")
 
 ## Exploratieve data-analyse watervogelaantallen
 
-De globale patronen in de maandelijkse vogelaantallen langsheen de Zeeschelde blijven afnemend (\@ref(fig:100-figuur-maandelijkse-totalen)). De wintermaxima *(noot[^footnote-100-1])* laten zich tellen in de maanden december en januari en schommelen dan rond een totaal van 13 000 watervogels en meeuwen. De laagste aantallen worden geteld in maart. De vogelaantallen zijn zwak afnemend sinds 2007, na een periode met sterke afname in vogelaantallen tussen 2002 en 2006. 
+De globale patronen in de maandelijkse vogelaantallen langsheen de Zeeschelde blijven afnemend (Figuur \@ref(fig:100-figuur-maandelijkse-totalen)). De wintermaxima[^footnote-100-1] laten zich tellen in de maanden december en januari en schommelen dan rond een totaal van 13 000 watervogels en meeuwen. De laagste aantallen worden geteld in maart. De vogelaantallen zijn zwak afnemend sinds 2007, na een periode met sterke afname in vogelaantallen tussen 2002 en 2006. 
 
 [^footnote-100-1]: Maximum van de som van alle vogels per wintermaand (oktober tot en met maart).
 
-De winter van 2017/18 *(noot[^footnote-100-2])* was klimatologisch gezien normaal. Gemiddelde neerslag, gemiddelde wintertemperatuur en gemiddelde zonneschijn. Er werden geen lange vorstperiodes genoteerd waardoor geen opvallende winterinflux van vogels naar de Zeeschelde optrad. http://www.meteo.be/meteo/view/nl/37169816-Winter+2018.html#ppt_37170051. De proportionele verdeling van de watervogels in de verschillende waterlichamen (zie waterlichamen in Figuur **XXXfigrefXXX** toont een geleidelijke toename van het aantal vogels dat verblijft in de Beneden-Zeeschelde. Het aandeel watervogels dat verbleef in de Durme is verhoudingsgewijs gedaald in de winter 2017/18 (Figuur \@ref(fig:100-figuur-verhouding-aantallen)).
+De winter van 2017/18 [^footnote-100-2] was klimatologisch gezien normaal. Gemiddelde neerslag, gemiddelde wintertemperatuur en gemiddelde zonneschijn. Er werden geen lange vorstperiodes genoteerd waardoor geen opvallende winterinflux van vogels naar de Zeeschelde optrad. http://www.meteo.be/meteo/view/nl/37169816-Winter+2018.html#ppt_37170051. De proportionele verdeling van de watervogels in de verschillende waterlichamen (zie waterlichamen in Figuur **XXXfigrefXXX** toont een geleidelijke toename van het aantal vogels dat verblijft in de Beneden-Zeeschelde. Het aandeel watervogels dat verbleef in de Durme is verhoudingsgewijs gedaald in de winter 2017/18 (Figuur \@ref(fig:100-figuur-verhouding-aantallen)).
 
 [^footnote-100-2]: KMI winter `r laatste_jaar` (dec `r as.numeric(laatste_jaar) - 1` - feb `r laatste_jaar`) ~= wintervogeljaar (telseizoen `r laatste_telseizoen`).
 
@@ -279,7 +276,7 @@ knitr::include_graphics(paste0(pad_figuren, "100_figuur_aantallen_zijrivieren.jp
 
 <br/>  
 
-De trends in de wintervogelaantallen opgedeeld volgens de trofische indicatorgroepen is weergegeven in Figuur \@ref(fig:100-figuur-aantallen-indicatorgroepen). 
+De trends in de wintervogelaantallen opgedeeld volgens de trofische indicatorgroepen is weergegeven in Figuur \@ref(fig:100-figuur-aantallen-trofische-groep). 
 
 Winter **XXX**`r laatste_telseizoen` was er een verdere terugval in het aantal benthivore overwinteraars (voornamelijk steltlopers) in Zeeschelde IV en III. Vooral de lage aantallen kluut en wulp in het winterseizoen vallen op. Deze tendens lijkt op het eerste zicht niet gecorreleerd met een kleiner voedselaanbod. Na de sterke terugval in het aantal visetende vogels in Zeeschelde II in de voorgaande winter nam het aantal terug toe voorbije winter. 
 
