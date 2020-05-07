@@ -26,8 +26,6 @@ knitr::opts_chunk$set(echo = FALSE, error=FALSE, warning=FALSE, message=FALSE, c
 library(tidyverse)
 library(lubridate)
 library(writexl)
-# library(flextable)
-# library(officer)
 
 library(INBOtheme)
 
@@ -52,8 +50,8 @@ pad_tabellen <- maak_pad(params$hoofdstuk, "tabellen")
 
 ##### datasets voor aantal en gewicht:
 
-  - _C:/Users/joost_vanoverbeke/Documents/tmp_moneos/moneos_visdata/ankerkuil_aantallen_2012_2018.csv_
-  - _C:/Users/joost_vanoverbeke/Documents/tmp_moneos/moneos_visdata/ankerkuil_gewicht_2012_2018.csv_
+  - _G:/Mijn Drive/INBODATA/PROJECTEN/PRJ_SCHELDE/VNSC/Rapportage_INBO/2020/090_vissen/data/ankerkuil_aantallen_2012_2018.csv_
+  - _G:/Mijn Drive/INBODATA/PROJECTEN/PRJ_SCHELDE/VNSC/Rapportage_INBO/2020/090_vissen/data/ankerkuil_gewicht_2012_2018.csv_
 
 ```{r inlezen-data}
 
@@ -77,6 +75,12 @@ data_ankerkuil <-
                           Z = "zomer")) %>% 
   mutate(seizoen = factor(seizoen, levels = c("voorjaar", "zomer", "najaar")),
          locatie = factor(locatie, levels = c(c("Doel", "Antwerpen", "Steendorp", "Branst"))))
+
+
+vroegste_jaar <-
+  data_ankerkuil %>% 
+  pull(jaar) %>% 
+  min()
 
 laatste_jaar <-
   data_ankerkuil %>% 
@@ -284,6 +288,21 @@ relatief_aantal %>%
 
 
 ggsave(paste0(pad_figuren, "relatief_aantal_gevangen_individuen.jpg"))
+
+```
+
+
+```{r meta-data}
+
+meta_data <- 
+  enframe(c(vroegste_jaar = vroegste_jaar,
+            laatste_jaar = laatste_jaar,
+            aantal_soorten = length(soorten_vis)),
+          name = "naam", value = "waarde")
+
+meta_data %>% 
+  write_delim(paste0(pad_data, "vissen_meta_data.csv"),
+              delim = ";")
 
 ```
 

@@ -445,7 +445,7 @@ ggsave(paste0(pad_figuren, "100_figuur_aantallen_visetend_en_steltlopers.jpg"))
 ```
 
 
-```{r}
+```{r meta-data}
 
 meta_data <- 
   enframe(c(vroegste_telseizoen = vroegste_telseizoen, 

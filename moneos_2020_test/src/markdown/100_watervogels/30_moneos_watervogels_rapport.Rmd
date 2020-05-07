@@ -201,6 +201,7 @@ knitr::include_graphics("100-tabel-teltrajecten.png")
 
 ```
 <!-- **XXX**voetnoot -->
+
 <br/>  
 
 ## Exploratieve data-analyse watervogelaantallen

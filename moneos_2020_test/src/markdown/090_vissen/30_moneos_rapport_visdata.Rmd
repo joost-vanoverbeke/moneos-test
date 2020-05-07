@@ -1,25 +1,18 @@
 ---
-title: "moneos hoofdstuk vissen"
-knit: (function(inputFile, encoding) { 
+params:
+  hoofdstuk: "090_vissen"
+knit: (function(inputFile, encoding) {
         rmarkdown::render(inputFile,
-                          encoding=encoding, 
-                          output_dir = "../../../output")})
+                          encoding=encoding,
+                          output_dir = {
+                            source("../pad.R");
+                            maak_pad(rmarkdown::yaml_front_matter(inputFile)$params$hoofdstuk, "output")
+                          }
+                          )})
+title: "moneos hoofdstuk vissen"
 output:
   bookdown::word_document2:
-    reference_docx: ../INBO_rapportsjabloon.dotx
-language:
-  label:
-    fig:    'Figuur '
-    tab:    'Tabel '
-    eq:     'Vergelijking '
-    thm:    'Theorema '
-    lem:    'Lemma '
-    def:    'Definitie '
-    cor:    'Gevolgtrekking '
-    prp:    'Bewering '
-    ex:     'Voorbeeld '
-    proof:  'Bewijs. '
-    remark: 'Opmerking. '
+    reference_docx: ../INBO_sjabloon.docx
 bibliography: references.bib
 link-citations: TRUE
 csl: ../ecology.csl
@@ -39,16 +32,14 @@ knitr::opts_knit$set(eval.after = "fig.cap")
 
 library(tidyverse)
 library(readxl)
-library(flextable)
-library(officer)
-
-library(INBOtheme)
+# library(flextable)
+# library(officer)
+library(kableExtra)
 
 ```
 
 
 ```{r pad}
-
 
 # inlezen van variabelen
 # pad naar data : pad_data
@@ -57,18 +48,25 @@ library(INBOtheme)
 
 source("../pad.R")
 
-hoodstuk <- "090_vissen"
-pad_data <- maak_pad(hoodstuk, "data")
-pad_figuren <- maak_pad(hoodstuk, "figuren")
-pad_tabellen <- maak_pad(hoodstuk, "tabellen")
+pad_data <- maak_pad(params$hoofdstuk, "data")
+pad_figuren <- maak_pad(params$hoofdstuk, "figuren")
+pad_tabellen <- maak_pad(params$hoofdstuk, "tabellen")
 
 ```
 
 
-```{r periode}
+```{r meta_data}
 
-eerste_jaar <- 2012
-laatste_jaar <- 2018
+meta_data <- 
+  read_delim(paste0(pad_data, "vissen_meta_data.csv"),
+             delim = ";")
+  
+for(i in 1:nrow(meta_data)){
+  ##first extract the object value
+  tempobj=meta_data$waarde[i]
+  ##now create a new variable with the original name of the list item
+  eval(parse(text=paste(meta_data$naam[i],"= tempobj")))
+}
 
 ```
 
@@ -100,8 +98,8 @@ de locaties bemonsterd met ankerkuil zijn weergegeven in Figuur \@ref(fig:090-fi
 ```{r 090-figuur-locaties-ankerkuil, fig.cap=cap_locaties_ankerkuil}
 
 cap_locaties_ankerkuil <- 
-  paste0("De met ankerkuil bemonsterde locaties in d Zeeschelde in de period ", 
-         eerste_jaar, 
+  paste0("De met ankerkuil bemonsterde locaties in de Zeeschelde in de period ", 
+         vroegste_jaar, 
          " - ", 
          laatste_jaar, 
          ".")
@@ -110,6 +108,7 @@ knitr::include_graphics(paste0(pad_figuren, "locaties_ankerkuil.jpg"))
 
 ```
 
+<br/>  
 
 ## Resultaten
 
@@ -119,7 +118,7 @@ Het totaal aantal gevangen soorten is weergegeven in Figuur \@ref(fig:090-figuur
 
 cap_aantal_soorten <-
   paste0("Totaal aantal gevangen soorten per seizoen en per vangstcamapgne (", 
-         eerste_jaar, 
+         vroegste_jaar, 
          " - ", 
          laatste_jaar, 
          "), en het totaal aantal gevangen soorten per vangstcampagne in de Zeeschelde.")
@@ -127,6 +126,8 @@ cap_aantal_soorten <-
 knitr::include_graphics(paste0(pad_figuren, "aantal_soorten.jpg"))
 
 ```
+
+<br/>  
 
 
 Een overzicht van de soorten gevangen in `r laatste_jaar` is weergegeven in Tabel \@ref(tab:090-tabel-overzicht-soorten).
@@ -137,53 +138,75 @@ tabel_gevangen_soorten <-
   read_excel(paste0(pad_tabellen, "tabellen_vissen.xlsx"),
              sheet = "gevangen_soorten")
 
-tabel_namen <-
-  tabel_gevangen_soorten %>%
-  names()
-
-typologie_gevangen_soorten <-
-  data_frame(col_keys = tabel_namen,
-             colB = tabel_namen %>%
-               str_remove("_Doel|_Antwerpen|_Steendorp|_Branst"),
-             colA = tabel_namen %>%
-               str_remove("voorjaar_|zomer_|najaar_") %>%
-               str_replace(c("Antwerpen", "Steendorp"), c("Antw.", "Steend.")))
-
-cap_overzicht_soorten <-
-  paste0("Table: (\\#tab:090-tabel-overzicht-soorten)",
-         "Overzicht van de vissoorten gevangen tijdens de ankerkuilcampagnes in de Zeeschelde in ",
+cap_gevangen_soorten <-
+  paste0("Overzicht van de vissoorten gevangen tijdens de ankerkuilcampagnes in de Zeeschelde in ",
          laatste_jaar,
          ".")
 
-tabel_gevangen_soorten %>%
-  # flextable(col_keys = c(tabel_namen[1], "sep_1", tabel_namen[2:5], "sep_2", tabel_namen[6:9], "sep_3", tabel_namen[10:13])) %>%
-  flextable() %>%
-  set_header_df(mapping = typologie_gevangen_soorten, key = "col_keys" ) %>%
-  merge_h(part = "header") %>%
-  merge_v(part = "header", j = 1:2) %>%
-  theme_booktabs() %>%
-  font(part = "all", fontname = "Calibri") %>%
-  fontsize(part = "all", size = 8) %>%
-  align(align = "center", part = "all") %>%
-  # vline(j = c("soort", "voorjaar_Branst", "zomer_Branst"), border = fp_border(), part = "all") %>%
-  vline(j = str_subset(tabel_namen, "soort|Branst"), border = fp_border(), part = "all") %>%
-  vline_left(border = fp_border(), part = "all") %>%
-  fix_border_issues() %>%
-  empty_blanks() %>%
-  autofit(add_w = .0) %>%
-  set_caption(cap_overzicht_soorten)
+knitr::kable(NULL, caption = cap_gevangen_soorten)
+
+
+tabel_gevangen_soorten  %>% 
+  mutate_all(~replace_na(., "")) %>% 
+  mutate_all(~cell_spec(., color = "black")) %>%
+  knitr::kable(booktabs = TRUE,
+               align = c("l", rep("c", 12)),
+               col.names = c("", rep(c("Doel", "Antw.", "Steend.", "Branst"), 3)),
+               escape = FALSE) %>%
+  add_header_above(c(" " = 1, "voorjaar" = 4, "zomer" = 4, "najaar" = 4)) %>% 
+  kable_styling("bordered",
+                latex_options = c("scale_down"),
+                font_size = 15) %>%
+  # kable_styling(latex_options = c("scale_down")) %>%
+  save_kable("090-tabel-overzicht-soorten.png")
+
+knitr::include_graphics("090-tabel-overzicht-soorten.png")
+
+
+
+# tabel_namen <-
+#   tabel_gevangen_soorten %>%
+#   names()
+# 
+# typologie_gevangen_soorten <-
+#   data_frame(col_keys = tabel_namen,
+#              colB = tabel_namen %>%
+#                str_remove("_Doel|_Antwerpen|_Steendorp|_Branst"),
+#              colA = tabel_namen %>%
+#                str_remove("voorjaar_|zomer_|najaar_") %>%
+#                str_replace(c("Antwerpen", "Steendorp"), c("Antw.", "Steend.")))
+# 
+# 
+# tabel_gevangen_soorten %>%
+#   # flextable(col_keys = c(tabel_namen[1], "sep_1", tabel_namen[2:5], "sep_2", tabel_namen[6:9], "sep_3", tabel_namen[10:13])) %>%
+#   flextable() %>%
+#   set_header_df(mapping = typologie_gevangen_soorten, key = "col_keys" ) %>%
+#   merge_h(part = "header") %>%
+#   merge_v(part = "header", j = 1:2) %>%
+#   theme_booktabs() %>%
+#   font(part = "all", fontname = "Calibri") %>%
+#   fontsize(part = "all", size = 8) %>%
+#   align(align = "center", part = "all") %>%
+#   # vline(j = c("soort", "voorjaar_Branst", "zomer_Branst"), border = fp_border(), part = "all") %>%
+#   vline(j = str_subset(tabel_namen, "soort|Branst"), border = fp_border(), part = "all") %>%
+#   vline_left(border = fp_border(), part = "all") %>%
+#   fix_border_issues() %>%
+#   empty_blanks() %>%
+#   autofit(add_w = .0) %>%
+#   set_caption(cap_overzicht_soorten)
 
 ```
 
+<br/>  
 
-Het gemiddeld aantal individuen per m³ water is weergegeven in Figuur \@ref(fig:090-figuur-gemiddeld-seizoenen) en het relatief aantal gevangen individuen in Figuur \@ref(fig:090-figuur-relatief-gevangen).
+Het gemiddeld aantal individuen per m^3^ water is weergegeven in Figuur \@ref(fig:090-figuur-gemiddeld-seizoenen) en het relatief aantal gevangen individuen in Figuur \@ref(fig:090-figuur-relatief-gevangen).
 
 
 ```{r 090-figuur-gemiddeld-seizoenen, fig.cap=cap_gemiddeld_seizoenen}
 
 cap_gemiddeld_seizoenen <- 
   paste0("gemiddeld aantal individuen per m³ water gevangen in de Zeeschelde in de periode ", 
-         eerste_jaar, 
+         vroegste_jaar, 
          " - ", 
          laatste_jaar, 
          ".")
@@ -192,7 +215,7 @@ knitr::include_graphics(paste0(pad_figuren, "gemiddeld_over_seizoenen.jpg"))
 
 ```
 
-
+<br/>  
 
 ```{r 090-figuur-relatief-gevangen, fig.cap=cap_relatief_gevangen}
 
@@ -205,6 +228,7 @@ knitr::include_graphics(paste0(pad_figuren, "relatief_aantal_gevangen_individuen
 
 ```
 
+<br/>  
 
 ## Referenties  
 
