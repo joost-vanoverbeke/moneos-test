@@ -196,24 +196,6 @@ tabel_gevangen_soorten <-
   mutate(aanwezig = "x") %>% 
   spread(seizoen_locatie, aanwezig, fill = "")
 
-tabel_namen <- 
-  tabel_gevangen_soorten %>% 
-  names()
-
-typologie_gevangen_soorten <-
-  data_frame(col_keys = tabel_namen,
-             colB = tabel_namen %>%
-                      str_remove("_Doel|_Antwerpen|_Steendorp|_Branst"),
-             colA = tabel_namen %>%
-                      str_remove("voorjaar_|zomer_|najaar_") %>% 
-                      str_replace(c("Antwerpen", "Steendorp"), c("Antw.", "Steend.")))
-
-# if (knitr::opts_knit$get('rmarkdown.pandoc.to') == "docx") {
-#   pander(tabel_gevangen_soorten) 
-# } else { 
-#   knitr::kable(tabel_gevangen_soorten) 
-# }
-
 knitr::kable(tabel_gevangen_soorten)
 
 write_xlsx(list(gevangen_soorten = tabel_gevangen_soorten),
