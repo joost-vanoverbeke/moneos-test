@@ -12,7 +12,7 @@
     + Pas het pad aan in de file ‘000_template/src/pad.R’
     
   - Integratie met code op git(hub)
-    + maak een lokale versie aan van de repository via git
+    + maak een lokale versie (Rstudio project) aan van de moneos repository via git
     + Maak een folder aan ‘moneos_2020_test/src/markdown/naam_hoofdstuk’
     + Kopieer hierin enkel de files onder ‘moneos_2020_test/src/markdown/000_template/src/000_template’
     + pas in de lokale versie het pad aan in de file 'moneos_2020_test/src/markdown/pad.R'
