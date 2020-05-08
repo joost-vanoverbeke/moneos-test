@@ -11,6 +11,8 @@ maak_pad <- function(hoofdstuk, onderdeel = NULL) {
   pad <- paste0(pad_prj_schelde, pad_moneos, hoofdstuk, "/")
   if (!is.null(onderdeel))
     pad <- paste0(pad, onderdeel, "/")
+  if (!dir.exists(pad))
+    dir.create(pad, recursive = TRUE)
   return(pad)
 }
 
