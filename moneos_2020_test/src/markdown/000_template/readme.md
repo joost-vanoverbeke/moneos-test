@@ -1,4 +1,4 @@
-# templates voor MONEOS data verwerking en rapportage via Rmarkdown
+# templates voor MONEOS dataverwerking en rapportage via Rmarkdown
 
   - Kopieer de folder ‘moneos_2020_test/src/markdown/000_template’ lokaal
   
