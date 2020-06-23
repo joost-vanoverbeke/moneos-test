@@ -1,0 +1,442 @@
+---
+params:
+  hoofdstuk: "070_macrozoobenthos"
+knit: (function(inputFile, encoding) {
+        rmarkdown::render(inputFile,
+                          encoding=encoding,
+                          output_dir = {
+                            source("../pad.R");
+                            maak_pad(rmarkdown::yaml_front_matter(inputFile)$params$hoofdstuk, "output")
+                          }
+                          )})
+title: "Macrozoöbenthos data"
+output:
+  bookdown::word_document2
+---
+
+
+```{r setup, include=FALSE}
+
+knitr::opts_chunk$set(echo = FALSE, error=FALSE, warning=FALSE, message=FALSE, cache=FALSE)
+
+```
+
+
+```{r libraries}
+
+library(tidyverse)
+library(lubridate)
+library(readxl)
+library(writexl)
+
+```
+
+
+```{r pad}
+
+# inlezen van variabelen
+# pad naar data : pad_data
+# pad naar tabellen : pad_tabellen
+# pad naar figuren : pad_figuren
+
+source("../pad.R")
+
+pad_data <- maak_pad(params$hoofdstuk, "data")
+pad_figuren <- maak_pad(params$hoofdstuk, "figuren")
+pad_tabellen <- maak_pad(params$hoofdstuk, "tabellen")
+
+```
+
+
+```{r inlezen-recente-data}
+
+data_macrobenthos_recent <- 
+  read_excel(paste0(pad_data, "SpatialBenthos2018.xlsx")) %>% 
+  mutate(jaar = year(datum.x))
+
+jaar_recent <- 
+  data_macrobenthos_recent %>% 
+  distinct(jaar) %>% 
+  pull(jaar)
+
+```
+
+
+##### aantal stalen:
+
+```{r aantal-stalen}
+
+aantal_stalen <- 
+  data_macrobenthos_recent %>% 
+  distinct(staal) %>% 
+  nrow()
+
+aantal_stalen_waterlichaam_fysiotoop <-
+  data_macrobenthos_recent %>% 
+  count(waterlichaam, tidaal, fysiotoop) %>% 
+  knitr::kable()
+
+```
+
+  - Er zijn `r aantal_stalen` stalen in de dataset voor `r jaar_recent` 
+  - het aantal stalen per waterlichaam en fysiotoop:
+  
+  `r aantal_stalen_waterlichaam_fysiotoop`
+
+
+##### lege stalen:
+
+```{r lege-stalen}
+
+lege_stalen <-
+  data_macrobenthos_recent %>% 
+  group_by(staal, waterlichaam, tidaal, fysiotoop) %>% 
+  summarise(aantal = sum(aantal)) %>% 
+  ungroup() %>% 
+  filter(aantal == 0)
+
+```
+
+  - er zijn `r nrow(lege_stalen)` lege stalen in de dataset
+  
+  `r knitr::kable(lege_stalen)` 
+
+  
+##### aantal soorten:
+
+```{r soorten-recent}
+
+soorten <- 
+  data_macrobenthos_recent %>% 
+  distinct(soort)
+
+soorten_per_waterlichaam <-
+  data_macrobenthos_recent %>% 
+  distinct(waterlichaam, soort) %>% 
+  count(waterlichaam)
+
+```
+
+
+  - Er zijn `r nrow(soorten)` soorten(groepen) aangetroffen in de dataset 
+    + `r pull(soorten, soort)`
+
+  - Het aantal soorten per waterlichaam is:
+  
+  `r knitr::kable(soorten_per_waterlichaam)` 
+
+
+##### biomassa versus densiteit
+
+```{r biomassa-vs-densiteit, fig.height=4, fig.width=6}
+
+data_macrobenthos_recent %>% 
+  ggplot(aes(aantal + 1, aantalperm2 + 1)) +
+  geom_point() +
+  scale_x_log10() +
+  scale_y_log10()
+
+data_macrobenthos_recent %>% 
+  ggplot(aes(AFDW + min(AFDW[AFDW > 0]), AFDWperm2 + min(AFDWperm2[AFDWperm2 > 0]))) +
+  geom_point() +
+  scale_x_log10() +
+  scale_y_log10()
+
+
+data_macrobenthos_recent %>% 
+  ggplot(aes(aantal, AFDW)) +
+  geom_point()
+
+data_macrobenthos_recent %>% 
+  ggplot(aes(aantal + 1, AFDW + min(AFDW[AFDW > 0]))) +
+  geom_point() +
+  scale_x_log10() +
+  scale_y_log10()
+
+zero_aantal_nonzero_biomassa <-
+  data_macrobenthos_recent %>% 
+  filter(aantal == 0,
+         AFDW != 0) %>% 
+  select(locatie = staal, waterlichaam, fysiotoop, soort, aantal, AFDW)
+
+zero_biomassa_nonzero_aantal <-
+  data_macrobenthos_recent %>% 
+  filter(aantal != 0,
+         AFDW == 0) %>% 
+  select(locatie = staal, waterlichaam, fysiotoop, soort, aantal, AFDW)
+
+negatieve_biomassa <-
+  data_macrobenthos_recent %>% 
+  filter(AFDW < 0) %>%
+  select(locatie = staal, waterlichaam, fysiotoop, soort, aantal, AFDW)
+  
+extreme_biomassa <-
+  data_macrobenthos_recent %>% 
+  filter(AFDW > 0.5) %>% 
+  select(locatie = staal, waterlichaam, fysiotoop, soort, aantal, AFDW)
+
+```
+
+  - Er zijn `r nrow(zero_aantal_nonzero_biomassa)` cases van soorten met aantal = 0 en biomassa > 0
+    + deze aantallen worden gemarkeerd als NA
+  
+  `r knitr::kable(zero_aantal_nonzero_biomassa)`
+
+<br/>
+
+  - Er zijn `r nrow(zero_biomassa_nonzero_aantal)` cases van soorten met aantal > 0 en biomassa = 0
+    + deze biomassa's worden gemarkeerd als NA
+  
+  `r knitr::kable(zero_biomassa_nonzero_aantal)`
+
+<br/>
+  
+  - Er zijn `r nrow(negatieve_biomassa)` cases van soorten met biomassa < 0
+    + deze biomassa's worden gemarkeerd als NA
+  
+    `r knitr::kable(negatieve_biomassa)`
+
+<br/>
+  
+  - Er is één outlier met extreem hoge biomassa
+  
+    `r knitr::kable(extreme_biomassa)`
+
+
+```{r corrigeren-data}
+
+data_macrobenthos_recent <- 
+  data_macrobenthos_recent %>% 
+  mutate(aantal = if_else(aantal == 0 & AFDW != 0, NA_real_, aantal),
+         AFDW = if_else(AFDW == 0 & aantal != 0, NA_real_, AFDW),
+         aantalperm2 = if_else(aantal == 0 & AFDW != 0, NA_real_, aantalperm2),
+         AFDWperm2 = if_else(AFDW == 0 & aantal != 0, NA_real_, AFDWperm2))
+
+stalen_NA_aantal <-
+  data_macrobenthos_recent %>% 
+  filter(is.na(aantal)) %>% 
+  distinct(staal)
+
+stalen_NA_biomassa <-
+  data_macrobenthos_recent %>% 
+  filter(is.na(AFDW)) %>% 
+  distinct(staal)
+  
+```
+
+<br/>
+
+  - door missing values kunnen er van de `r aantal_stalen` stalen
+    + `r nrow(stalen_NA_aantal)` stalen niet gebruikt worden voor totalen aantallen 
+    + `r nrow(stalen_NA_biomassa)` stalen niet gebruikt worden voor totalen biomassa 
+
+
+
+
+##### data worden samengevoegd met historische gegevens
+
+```{r inlezen-historische-data}
+
+data_macrobenthos_historisch_densiteit <- 
+  read_excel(paste0(pad_data, "S_DS_V_002_macrobenthos_data2008-2017_rapportage2019_3.xlsx"),
+             sheet = "densiteit")
+
+data_macrobenthos_historisch_biomassa <- 
+  read_excel(paste0(pad_data, "S_DS_V_002_macrobenthos_data2008-2017_rapportage2019_3.xlsx"), 
+             sheet = "biomassa")
+
+data_macrobenthos_historisch_locaties <- 
+  read_excel(paste0(pad_data, "S_DS_V_002_macrobenthos_data2008-2017_rapportage2019_3.xlsx"), 
+             sheet = "locaties")
+
+
+data_macrobenthos_historisch <-
+  data_macrobenthos_historisch_densiteit %>% 
+  left_join(data_macrobenthos_historisch_biomassa)
+
+aantal_stalen_historisch <- 
+  data_macrobenthos_historisch %>% 
+  distinct(locatie) %>% 
+  nrow()
+
+```
+
+
+##### biomassa versus densiteit historische gegevens
+
+```{r biomassa-vs-densiteit_historisch, fig.height=4, fig.width=6}
+
+data_macrobenthos_historisch %>% 
+  ggplot(aes(densiteit, biomassa)) +
+  geom_point()
+
+data_macrobenthos_historisch %>% 
+  ggplot(aes(densiteit + 1, biomassa + min(biomassa[biomassa > 0], na.rm = TRUE))) +
+  geom_point() +
+  scale_x_log10() +
+  scale_y_log10()
+
+zero_densiteit_nonzero_biomassa <-
+  data_macrobenthos_historisch %>% 
+  filter(densiteit == 0,
+         biomassa != 0) %>% 
+  select(locatie, waterlichaam, fysiotoop, soort, densiteit, biomassa)
+
+zero_biomassa_nonzero_densiteit <-
+  data_macrobenthos_historisch %>% 
+  filter(densiteit != 0,
+         biomassa == 0) %>% 
+  select(locatie, waterlichaam, fysiotoop, soort, densiteit, biomassa)
+
+negatieve_biomassa <-
+  data_macrobenthos_historisch %>%
+  filter(biomassa < 0) %>%
+  select(locatie, waterlichaam, fysiotoop, soort, densiteit, biomassa)
+  
+extreme_biomassa <-
+  data_macrobenthos_historisch %>%
+  filter(biomassa > 500) %>%
+  select(locatie, waterlichaam, fysiotoop, soort, densiteit, biomassa)
+
+```
+
+  - Er zijn `r nrow(zero_densiteit_nonzero_biomassa)` cases van soorten met aantal = 0 en biomassa > 0:
+    + deze aantallen worden gemarkeerd als NA
+  
+  - Er zijn `r nrow(zero_biomassa_nonzero_densiteit)` cases van soorten met aantal > 0 en biomassa = 0:
+    + deze biomassa's worden gemarkeerd als NA
+
+<br/>
+  
+  - Er zijn `r nrow(negatieve_biomassa)` cases van soorten met biomassa < 0
+    + deze biomassa's worden gemarkeerd als NA
+  
+    `r knitr::kable(negatieve_biomassa)`
+
+<br/>
+  
+  - Er is één outlier met extreem hoge biomassa
+  
+    `r knitr::kable(extreme_biomassa)`
+
+
+
+```{r corrigeren-data-historisch}
+
+data_macrobenthos_historisch <- 
+  data_macrobenthos_historisch %>% 
+  mutate(biomassa = if_else(biomassa < 0, NA_real_, biomassa)) %>% 
+  mutate(densiteit = if_else(densiteit == 0 & biomassa != 0, NA_real_, densiteit),
+         biomassa = if_else(biomassa == 0 & densiteit != 0, NA_real_, biomassa))
+
+
+stalen_NA_densiteit <-
+  data_macrobenthos_historisch %>% 
+  filter(is.na(densiteit)) %>% 
+  distinct(staal)
+
+stalen_NA_biomassa <-
+  data_macrobenthos_historisch %>% 
+  filter(is.na(biomassa)) %>% 
+  distinct(staal)
+  
+```
+
+<br/>
+
+  - door missing values kunnen er van de `r aantal_stalen_historisch` stalen
+    + `r nrow(stalen_NA_densiteit)` stalen niet gebruikt worden voor totalen aantallen 
+    + `r nrow(stalen_NA_biomassa)` stalen niet gebruikt worden voor totalen biomassa 
+
+
+
+
+```{r extractie-densiteit-biomassa-locaties-historisch}
+
+data_macrobenthos_historisch_densiteit <-
+  data_macrobenthos_historisch %>% 
+  select(jaar, waterlichaam, waterloop, tidaal, fysiotoop, locatie, soort, densiteit)
+  
+data_macrobenthos_historisch_biomassa <-
+  data_macrobenthos_historisch %>% 
+  select(jaar, waterlichaam, waterloop, tidaal, fysiotoop, locatie, soort, biomassa)
+  
+```
+
+
+```{r extractie-densiteit-biomassa-locaties-recent}
+
+data_macrobenthos_recent_densiteit <-
+  data_macrobenthos_recent %>% 
+  select(jaar, waterlichaam, waterloop, tidaal, fysiotoop, locatie = staal, soort, densiteit = aantalperm2)
+  
+data_macrobenthos_recent_biomassa <-
+  data_macrobenthos_recent %>% 
+  select(jaar, waterlichaam, waterloop, tidaal, fysiotoop, locatie = staal, soort, biomassa = AFDWperm2)
+  
+data_macrobenthos_recent_locaties <-
+  data_macrobenthos_recent %>% 
+  mutate(campagne = paste0("spatial ", jaar_recent)) %>% 
+  distinct(locatie = staal, campagne, X = x, Y = y) 
+
+```
+
+
+```{r samenvoegen recent-historisch}
+
+data_macrobenthos_densiteit <- 
+  data_macrobenthos_historisch_densiteit %>% 
+  bind_rows(data_macrobenthos_recent_densiteit)
+  
+data_macrobenthos_biomassa <- 
+  data_macrobenthos_historisch_biomassa %>% 
+  bind_rows(data_macrobenthos_recent_biomassa)
+  
+data_macrobenthos_locaties <- 
+  data_macrobenthos_historisch_locaties %>% 
+  bind_rows(data_macrobenthos_recent_locaties)
+
+```
+
+
+##### jaren in de finale dataset:
+
+```{r jaren}
+
+jaren <-
+  data_macrobenthos_densiteit %>% 
+  distinct(jaar) %>% 
+  pull(jaar)
+
+jaar_range <-
+  range(jaren)
+
+```
+
+
+  - `r jaren`
+
+
+##### finale data weggeschreven naar:
+
+```{r filenames}
+
+file_name <-
+  paste0(pad_data, "macrobenthos_data_", paste(jaar_range, collapse = "_"), ".xlsx")
+
+```
+
+  - `r file_name`
+
+
+```{r wegschrijven-data, eval=FALSE}
+
+write_xlsx(list(densiteit = data_macrobenthos_densiteit,
+                biomassa = data_macrobenthos_biomassa,
+                locaties = data_macrobenthos_locaties),
+           path = file_name)
+
+```
+
+
+
