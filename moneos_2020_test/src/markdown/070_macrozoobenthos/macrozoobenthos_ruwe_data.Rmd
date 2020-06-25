@@ -1,0 +1,94 @@
+---
+params:
+  hoofdstuk: "070_macrozoobenthos"
+knit: (function(inputFile, encoding) {
+        rmarkdown::render(inputFile,
+                          encoding=encoding,
+                          output_dir = {
+                            source("../pad.R");
+                            maak_pad(rmarkdown::yaml_front_matter(inputFile)$params$hoofdstuk, "output")
+                          }
+                          )})
+title: "Macrozoöbenthos data"
+output:
+  bookdown::word_document2
+---
+
+
+```{r setup, include=FALSE}
+
+knitr::opts_chunk$set(echo = FALSE, error=FALSE, warning=FALSE, message=FALSE, cache=FALSE)
+
+```
+
+
+```{r libraries}
+
+library(tidyverse)
+library(lubridate)
+library(readxl)
+library(writexl)
+library(googlesheets4)
+
+```
+
+
+```{r pad}
+
+# inlezen van variabelen
+# pad naar data : pad_data
+# pad naar tabellen : pad_tabellen
+# pad naar figuren : pad_figuren
+
+source("../pad.R")
+
+pad_data <- maak_pad(params$hoofdstuk, "data")
+pad_figuren <- maak_pad(params$hoofdstuk, "figuren")
+pad_tabellen <- maak_pad(params$hoofdstuk, "tabellen")
+
+```
+
+
+```{r inlezen-uit-google-sheet}
+
+macrobenthos_sheet <- 
+  read_sheet("https://docs.google.com/spreadsheets/d/1vXtZAKBI4mN6gRGI02tZSuEt66kyARxk2DVxqEXeoT0/edit#gid=1482251030",
+             sheet = "Spatial 18")
+
+```
+
+
+```{r selectie-spatial-datapunten}
+
+macrobenthos_spatial <-
+  macrobenthos_sheet %>% 
+  filter(str_sub(staal, 3, 4) == "18")
+
+```
+
+
+```{r optellen-fracties}
+
+macrobenthos_spatial <-
+  macrobenthos_spatial %>% 
+  group_by(campagne, staal, datum, soort) %>% 
+  summarise(aantal = sum(aantal),
+            AFDW = sum(AFDW))
+
+# testen op duplicaten
+# macrobenthos_spatial %>% 
+#   distinct(staal, datum) %>% 
+#   count(staal) %>% 
+#   filter(n > 1)
+
+```
+
+```{r}
+
+ecotopen <- read_excel(paste0(pad_data, "Ecotoop_check_SP18.xlsx"))
+
+strata <- read_excel(paste0(pad_data, "VERDELING PER STRATUM 2019.xlsx"))
+
+```
+
+
