@@ -26,7 +26,8 @@ knitr::opts_chunk$set(echo = FALSE, error=FALSE, warning=FALSE, message=FALSE, c
 
 library(tidyverse)
 library(lubridate)
-library(inborutils)
+#library(inborutils)  ## moet dat nu inbodb worden??
+library(inbodb)
 library(DBI)
 
 ```
@@ -51,7 +52,7 @@ pad_tabellen <- maak_pad(params$hoofdstuk, "tabellen")
 ```{r benodigde-seizoenen}
 
 vroegste_seizoen <- "1991/1992"
-laatste_seizoen <- "2018/19"
+laatste_seizoen <- "2019/2020"
 
 seizoenen <-
   (vroegste_seizoen %>% str_sub(0, 4) %>% as.numeric):(laatste_seizoen %>% str_sub(0, 4) %>% as.numeric) %>% 
@@ -171,6 +172,82 @@ WaterbirdsBT <-
 
 ```
 
+```{r bevragen-warehouse-zeeschelde-tellingen}
+
+query <-
+  paste0(str_sub(basis_query_tellingen, end=-2),
+         " AND f.AnalyseSetKey = 1 /**alleen Zeescheldetellingen**/",
+         " AND ss.seasonname in ",
+         seizoenen_query,
+         str_sub(grouping_tellingen, end=-2),
+         ";"
+  )
+
+con <- connect_inbo_dbase("W0004_00_Waterbirds")
+overzicht_tellingen <-
+  dbGetQuery(con,
+             query)
+dbDisconnect(con)
+
+# selectie van de telgebieden gespecifieerd in de Zeeschelde_gebiedsgroepen - KRWZS
+overzicht_tellingen <-
+  overzicht_tellingen %>%
+  filter(GebiedsCode %in% gebiedsgroepen$gebiedscode)
+
+```
+
+```{r toevoegen-warehouse-tellingen-MIDMA-zijrivieren}
+
+telzones_zijrivieren <-
+  gebiedsgroepen$gebiedscode %>%
+  unique() %>%
+  setdiff(overzicht_tellingen$GebiedsCode %>%
+            unique())
+
+telzones_query <-
+  paste0("'", telzones_zijrivieren, "'", collapse = ",") %>%
+  paste0("(", ., ")")
+
+query <-
+  paste0(str_sub(basis_query_tellingen, end=-2),
+         " AND f.Analysesetkey in (2, 3, 4) /**alleen boottellingen, i.e. uit ZSCH-analyseset**/",
+         " AND ss.seasonname in ",
+         seizoenen_query,
+         " AND l.LocationWVCode in ",
+         telzones_query,
+         str_sub(grouping_tellingen, end=-2),
+         ";"
+  )
+
+
+con <- connect_inbo_dbase("W0004_00_Waterbirds")
+tellingen_zijrivieren <-
+  dbGetQuery(con,
+             query)
+dbDisconnect(con)
+
+overzicht_tellingen <-
+  overzicht_tellingen %>%
+  bind_rows(tellingen_zijrivieren)
+
+
+```
+
+```{r overzicht-aantal-tellingen}
+
+overzicht_tellingen <-
+  overzicht_tellingen %>%
+  mutate(IsNulTelling = if_else(IsNulTelling == 1, "ja", "nee"))
+
+
+# overzicht aantal tellingen
+overzicht_tellingen %>%
+  count(AnalyseSet, TelvolledigheidCode, Telvolledigheid, IsNulTelling)
+
+```
+
+
+
 
 ```{r correcties-WaterbirdsBT}
 
@@ -201,11 +278,26 @@ WaterbirdsBT <-
   WaterbirdsBT %>% 
   filter(!str_detect(Gebied, "aapskooi|Oude Dijle"))
 
+# Telzones op nederlands grondgebied worden niet meegeteld (strik gesproken geen Zeeschelde). Dit gaat over de teltrajecten (9999999 en 9999998) gelegen op Nederlands grondgebied. Deze teltrajecten zitten niet in de gebiedsgroepen file
+
 # # Enkel wintertellingen
 # WaterbirdsBTw <- WaterbirdsBT %>% filter(month(Teldatum) %in% c(10, 11, 12, 1, 2, 3))
 
 ```
 
+```{r telseizoen metadata}
+
+
+laatste_telseizoen <- 
+  WaterbirdsBT %>% 
+  pull(Telseizoen) %>% 
+  unique() %>% 
+  sort() %>% 
+  last()
+
+
+
+```
 
 ```{r toevoegen-informatie-gebiedsgroepen}
 
@@ -227,6 +319,22 @@ WaterbirdsBT <-
 
 ```
 
+```{r controle volledigheid}
+Aantaltellingenpergebied0 <- WaterbirdsBT %>% 
+    filter (telseizoen == "2018/19") %>% 
+  count(gebiedsgroep_code, telseizoen, teldatum) 
+  
+# aantal tellingen per telseizoen ingevoerd 
+Aantaltellingenpergebied <- WaterbirdsBT %>% 
+  filter (telseizoen == "2018/19") %>% 
+  distinct(gebiedsgroep_code, gebiedscode, teldatum, telseizoen) %>% 
+  count(gebiedsgroep_code, gebiedscode, telseizoen) 
+  
+
+knitr::kable(Aantaltellingenpergebied)
+
+
+```
 
 ```{r optellen-per-gebiedsgroep-rivier}
 
