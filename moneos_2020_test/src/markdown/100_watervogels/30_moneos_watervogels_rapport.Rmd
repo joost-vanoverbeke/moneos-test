@@ -117,6 +117,31 @@ De geselecteerde teltrajecten van de zijrivieren (Watervogeldatabank, INBO) zijn
 
 _Ontbrekende data telseizoen 2018/19 en 2019/20_:
 
+**2018/19**
+
+INBO Zeeschelde tellingen zijn volledig
+Eerste jaar met geen tellingen bij start zomerseizoen (april en mei)
+
+MIDMA ontbrekende data:
+Zenne Zennegat - Hombeekbrug MECHELEN - geen telling in maart 2019
+Tijgebonden Oude Schelde Gent - monding Ringvaart- ontbrekende telling oktober en november 2018
+Rupel Wintam-sas tot brug Boom
+Rupel Wintam-sas tot brug Boom
+Rupel Wintam-sas tot brug Boom - ontbrekende telling oktober 2018 & maart 2019
+Dijle Netemonding - Mechelen - ontbrekende tellingen jan, feb, maart 2019
+
+
+**2019/20** 
+
+
+INBO Zeeschelde tellingen zijn volledig
+
+MIDMA ontbrekende data:
+Zenne Zennegat - Hombeekbrug MECHELEN - geen telling in okt 2019 en februari 2020
+Tijgebonden Oude Schelde Gent - monding Ringvaart- ontbrekende telling februari 2020
+Dijle Netemonding - Mechelen - ontbrekende telling maart 2020
+
+
 _Winterkarakteristiek telseizoen 2018/19 en 2019/20_:
 
 De winter van 2018/19 [^footnote-100-2] was klimatologisch een zachte winter. Warme temperatuur, relatief veel zon en gemiddelde neerslag. De langste koudeperiode was van 18-25 januari 2019 en enkele dagen begin februari 2019.Er waren 22 vorstdagen en 2 winterse dagen (max <0°C).  De winter van 2019/20 was klimatologisch een warme winter.De seizoensgemiddelde temperatuur was 6.3°C (normaal 3.6°C). Er waren slechts 14 vorstdagen en er waren geen winterse dagen (max<0°C) http://www.meteo.be/. Er werden ook ten noorden van België geen lange vorstperiodes genoteerd waardoor geen opvallende winterinflux van vogels naar de Zeeschelde optrad.
@@ -293,6 +318,7 @@ De bergeend neemt voor het 6de jaar in rij af. Deze afname is opvallend in Zeesc
 
 De trends van de meest talrijke exotische overwinterende vogelsoorten is weergegeven in Figuur \@ref(fig:100_figuur_aantallen_exoten). De hoogste aantallen worden geteld in Zeeschelde III + Rupel en de aantallen zijn toenemend vooral voor Canadese gans en nijlgans. De boerengans en soepeend komen in relatief kleine aantallen voor en zijn stabiel tot afnemend. 
 
+De dichtheden van de overwinterende watervogels per KRW-zone op het oppervlakte zacht substraat slik in de Zeeschelde is weergegeven in Figuur \@ref(fig:100_figuur_dichtheid). Voor de figuur werd een selectie gemaakt van alle omnivore en benthivore soorten en werden kuifeend en tafeleend uitgesloten omdat beide soorten vooral afhankelijk zijn van het voedselaanbod in de ondiepe waterzones. In 2001 was de vogeldichtheid in Zeeschelde III en Rupel en Zeeschelde II rond de 140 vogels per ha. In 2016 daalde deze dichtheid in Zeeschelde III + Rupel tot ongeveer 20 vogels per hectare. In Zeeschelde II bleef dit aantal ongeveer 80 vogels per ha. De dichtheid in Zeeschelde IV schommelt rond de 10 vogels per hectare. Dit is heel wat lager dan in andere zones nochtans dat het voedselaanbod als biomassa bodemdieren per oppervlakte eenheid hier niet significant lager is dan in andere zones. De oppervlakte zacht substraat in de verschillende zones is maar in beperkte mate veranderd (Hoofdstuk **XXXX**) en heeft hierdoor een beperkte invloed, tot nu toe, op de berekende dichtheden. 
 
 ```{r 100-figuur-aantallen-trofische-groep, fig.cap=cap_aantallen_trofische_groep}
 
@@ -335,7 +361,17 @@ knitr::include_graphics(paste0(pad_figuren, "100_figuur_aantallen_exoten.jpg"))
 ```
 
 <br/> 
-## Algemene conclusie
+
+```{r 100-figuur-dichtheden-watervogels-per-zone, fig.cap=cap_dichtheden}
+
+cap_dichtheden <- "Vogeldichtheid (aantallen per ha zacht substraat slik) van getelde wintervogels (okt.-mrt.) in de 4 KRW-zones van de Zeeschelde+Rupel. Data gepresenteerd voor de jaren overeenkomstig de beschikbare ecotopenkaart"
+                                            
+knitr::include_graphics(paste0(pad_figuren, "100_figuur_dichtheid.jpg"))
+
+```
+
+<br/> 
+**Algemene conclusie**
 
 De vogelaantallen op de Zeeschelde vertonen een doorgaande dalende trend. Deze trends lijken ondertussen al niet meer gerelateerd aan de systeemshift die er kwam door de verbeterende waterkwaliteit. Deze trend vraagt om bijkomende inzichten zodat eventueel maatregelen kunnen getroffen worden om de negatieve trend om te buigen. 
 
