@@ -118,7 +118,7 @@ WHERE 1=1
 
 query <-
   paste0(str_sub(basis_query, end=-2),
-         " AND F.Analysesetkey in (1) /**alleen midmaandelijkse tellingen, i.e. uit MIDMA-analysesets**/",
+         " AND F.Analysesetkey in (1) /**alleen boottellingen, i.e. uit ZSCH-analyseset**/",
          " AND SS.seasonname in ",
          seizoenen_query,
          ";"
@@ -152,7 +152,7 @@ telzones_query <-
 
 query <-
   paste0(str_sub(basis_query, end=-2),
-         " AND F.Analysesetkey in (2, 3, 4) /**alleen boottellingen, i.e. uit ZSCH-analyseset**/",
+         " AND F.Analysesetkey in (2, 3, 4) /**alleen midmaandelijkse tellingen, i.e. uit MIDMA-analysesets**/",
          " AND SS.seasonname in ",
          seizoenen_query,
          " AND L.LocationWVCode in ",
@@ -172,6 +172,71 @@ WaterbirdsBT <-
 
 ```
 
+```{r basis-query-tellingen}
+
+basis_query_tellingen <-
+"WITH NulTelling AS
+  (
+  SELECT SampleKey
+  FROM
+  (
+  SELECT sampleKey, sum(taxoncount) as AantalIndividu
+  FROM FactAnalyseSetOccurrence
+  WHERE AnalyseSetKey = 1
+  GROUP BY sampleKey
+  )tmp
+  WHERE tmp.AantalIndividu = 0
+  )
+SELECT
+  su.SurveyCode AS ProjectCode
+, su.SurveyNaam AS Project
+, a.AnalyseSetKey AS AnalyseSetCode
+, a.AnalyseSetNaam AS AnalyseSet
+, l.RegioWVNaam AS Regio
+, l.LocationWVCode AS GebiedsCode
+, l.LocationWVNaam AS Gebied
+, ss.Seasonname AS Telseizoen
+, e.EventLabel AS Telling
+, e.SortOrder AS TellingSortOrder
+, f.SampleDate AS Teldatum
+, s.CoverageCode AS TelvolledigheidCode
+, s.CoverageDescription AS Telvolledigheid
+, CASE WHEN NulTelling.SampleKey IS NOT NULL THEN 1 ELSE 0 END AS IsNulTelling
+FROM FactAnalyseSetOccurrence f
+  INNER JOIN DimSurvey su ON su.surveykey = f.surveykey
+  INNER JOIN DimAnalyseSet a ON a.AnalyseSetKey = f.AnalyseSetKey
+  INNER JOIN DimLocationWV l ON l.locationwvkey = f.locationwvkey
+  INNER JOIN DimSeason ss ON ss.Seasonkey = f.seasonkey
+  INNER JOIN DimEvent e ON e.eventkey = f.eventkey
+  INNER JOIN DimSample s ON s.SampleKey = f.SampleKey
+  LEFT OUTER JOIN NulTelling ON NulTelling.SampleKey = f.SampleKey
+WHERE 1=1
+  AND s.samplestatus = 'CHECKED' /**alleen gevalideerde records**/
+  AND s.coveragecode not in ('-', 'N')  /**niet getelde tellingen zijn irrelevant**/
+;"
+
+grouping_tellingen <-
+"GROUP BY
+  su.SurveyCode
+, su.SurveyNaam
+, a.AnalyseSetKey
+, a.AnalyseSetNaam
+, l.RegioWVCode
+, l.RegioWVNaam
+, l.LocationWVCode
+, l.LocationWVNaam
+, ss.Seasonname
+, e.EventCode
+, e.EventLabel
+, e.SortOrder
+, f.SampleDate
+, s.CoverageCode
+, s.CoverageDescription
+, s.IsNulTelling
+, NulTelling.SampleKey;"
+```
+
+
 ```{r bevragen-warehouse-zeeschelde-tellingen}
 
 query <-
@@ -179,7 +244,7 @@ query <-
          " AND f.AnalyseSetKey = 1 /**alleen Zeescheldetellingen**/",
          " AND ss.seasonname in ",
          seizoenen_query,
-         str_sub(grouping_tellingen, end=-2),
+         str_sub(grouping_tellingen, end=-2), 
          ";"
   )
 
@@ -210,7 +275,7 @@ telzones_query <-
 
 query <-
   paste0(str_sub(basis_query_tellingen, end=-2),
-         " AND f.Analysesetkey in (2, 3, 4) /**alleen boottellingen, i.e. uit ZSCH-analyseset**/",
+         " AND f.Analysesetkey = 2 /**alleen midmaandelijkse tellingen, i.e. uit MIDMA-analysesets - voldoende om enkel analyseset 2 te nemen**/",
          " AND ss.seasonname in ",
          seizoenen_query,
          " AND l.LocationWVCode in ",
@@ -233,6 +298,29 @@ overzicht_tellingen <-
 
 ```
 
+
+```{r correcties-overzicht_tellingen}
+
+# checken voor dubbels in de dataset
+overzicht_tellingen  %>% 
+    arrange(Gebied, Telseizoen, Telling, Teldatum, ProjectCode) %>% 
+  distinct(Gebied, Telseizoen, Telling, Teldatum, ProjectCode)
+
+
+
+```
+
+
+```{r toevoegentellinging-informatie-gebiedsgroepen}
+
+overzicht_tellingen <- 
+  overzicht_tellingen %>% 
+  rename_all(tolower) %>% 
+  left_join(gebiedsgroepen) %>% 
+  select(-telling, -tellingsortorder)
+
+```
+
 ```{r overzicht-aantal-tellingen}
 
 overzicht_tellingen <-
@@ -241,11 +329,29 @@ overzicht_tellingen <-
 
 
 # overzicht aantal tellingen
-overzicht_tellingen %>%
-  count(AnalyseSet, TelvolledigheidCode, Telvolledigheid, IsNulTelling)
+aantaltellingen <- overzicht_tellingen %>%
+  count(analyseset, telvolledigheidcode, telvolledigheid, isnultelling)
+
+knitr::kable(aantaltellingen)
+
+# volledigheid wintertelseizoen
+overzicht_tellingen %>% 
+  filter (telseizoen == "2019/20") %>% 
+  filter(month(teldatum) %in% c(10, 11, 12, 1, 2, 3)) %>% 
+  group_by(gebiedscode, gebied, gebiedsgroep_code) %>% 
+  count(telseizoen, sort= TRUE) %>% 
+  filter (n < 6) # gebieden met minder dan 6 tellingen vertonen ontbrekende wintertellingen
+  
+
+
+overzicht_tellingen %>% 
+  filter (telseizoen == "2019/20") %>% 
+  filter (gebiedscode == 3121003) %>% 
+  select(gebied, teldatum) %>% #kijk alleen naar teldatum want telling en tellingsortorder kloppen niet in databank
+  arrange(teldatum)
+
 
 ```
-
 
 
 
