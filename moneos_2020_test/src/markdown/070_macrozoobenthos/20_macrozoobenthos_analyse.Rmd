@@ -25,7 +25,9 @@ knitr::opts_chunk$set(echo = FALSE, error=FALSE, warning=FALSE, message=FALSE, c
 ```{r libraries}
 
 library(tidyverse)
+library(readxl)
 library(writexl)
+library(ggpubr)
 library(INBOtheme)
 
 ```
@@ -49,82 +51,473 @@ pad_tabellen <- maak_pad(params$hoofdstuk, "tabellen")
 
 ```{r data}
 
-template_data <- 
-  read_delim(paste0(pad_data, "template_data.csv"),
-              delim = ";")
+data_macrobenthos <- 
+  read_excel(paste0(pad_data, "macrobenthos_data_2008_2018.xlsx")) %>% 
+  mutate(tidaal = if_else(tidaal == "sub", "subtidaal", "intertidaal"),
+         tidaal = factor(tidaal, 
+                         levels = c("subtidaal", "intertidaal")))
 
-kleinste_x <- 
-  template_data$x %>% 
+
+vroegste_jaar <-
+  data_macrobenthos %>% 
+  pull(jaar) %>% 
   min()
 
-grootste_x <- 
-  template_data$x %>% 
+laatste_jaar <-
+  data_macrobenthos %>% 
+  pull(jaar) %>% 
   max()
 
-kleinste_y <- 
-  template_data$y %>% 
-  min()
-
-grootste_y <- 
-  template_data$y %>% 
-  max()
-
-```
-
-
-##### beschrijving van de data
-
-  - Er zijn `r ncol(template_data)` variabelen
-    + `r paste(names(template_data), sep = ", ")`
-  - Er zijn `r nrow(template_data)` metingen
-  - Er zijn `r count(template_data %>% filter(y <= 0))$n` y waarden <= 0
-
-
-
-##### overzicht x waarden 
-
-```{r 000-tabel-x-waarden}
-
-tabel_x_waarden <- 
-  template_data %>% 
-  mutate(x_cat = cut(x, floor(kleinste_x-1):ceiling(grootste_x+1))) %>% 
-  count(x_cat)
-
-knitr::kable(tabel_x_waarden)
-
-write_xlsx(list(x_waarden = tabel_x_waarden),
-           paste0(pad_tabellen, "template_tabellen.xlsx"))
+zeeschelde_order <-
+  c("Zeeschelde IV", "Zeeschelde III", "Zeeschelde II", "Zeeschelde I")
+zijrivieren_order <-
+  c("Rupel", "Durme", "Nete", "Dijle", "Zenne")
+waterlopen_order <-
+  c(zeeschelde_order, zijrivieren_order)
+  
+fysiotoop_order <-
+  c("diep subtidaal", "matig diep subtidaal", "ondiep subtidaal", "laag intertidaal", "middelhoog/hoog intertidaal", "hard substraat")
 
 ```
 
 
-##### figuur regressie
+```{r totaal-over-soorten}
 
-```{r 000-figuur-regressie, fig.height=5, fig.width=8}
+data_macrobenthos_totaal <-
+  data_macrobenthos %>% 
+  group_by(jaar, waterlichaam, waterloop, waterloop2, systeem, tidaal, fysiotoop, locatie) %>% 
+  summarise_at(vars(densiteit, biomassa), ~sum(.)) %>% 
+  ungroup()
 
-template_data %>% 
-  ggplot(aes(x, y)) +
-  geom_point() +
-  geom_smooth(method = "lm")
+biom_min <- 
+  min(data_macrobenthos_totaal$biomassa[!is.na(data_macrobenthos_totaal$biomassa) & data_macrobenthos_totaal$biomassa > 0])
 
-ggsave(paste0(pad_figuren, "000_figuur_regressie.jpg"))
+data_macrobenthos_totaal %>% 
+  distinct(tidaal, fysiotoop) %>% 
+  arrange(tidaal, fysiotoop)
+
+data_macrobenthos_totaal %>% 
+  filter(jaar == laatste_jaar) %>% 
+  distinct(tidaal, fysiotoop) %>% 
+  arrange(tidaal, fysiotoop)
+
+```
+
+```{r 070-tabel-staalnamelocaties}
+
+tabel_staalnamelocaties <-
+  data_macrobenthos_totaal %>% 
+  filter(jaar == laatste_jaar) %>% 
+  count(waterloop = waterloop2, fysiotoop) %>% 
+  pivot_wider(names_from = fysiotoop, 
+              values_from = n,
+              values_fill = list(n = 0)) %>% 
+  select(waterloop, `diep subtidaal`, `matig diep subtidaal`, `ondiep subtidaal`, `laag intertidaal`, `middelhoog/hoog intertidaal`, `hard substraat`)
+
+
+write_xlsx(list(staalnamelocaties = tabel_staalnamelocaties),
+           path = paste0(pad_tabellen, "070_Macrobenthos_tabellen.xlsx"))
 
 ```
 
 
-```{r meta-data}
+```{r per-waterloop-en-tidaal}
 
-meta_data <- 
-  enframe(c(kleinste_x = kleinste_x, 
-            grootste_x = grootste_x, 
-            kleinste_y = kleinste_y,
-            grootste_y = grootste_y,
-            metingen = nrow(template_data)),
-          name = "naam", value = "waarde")
+data_macrobenthos_tidaal <-
+  data_macrobenthos_totaal %>% 
+  group_by(jaar, waterlichaam, waterloop2, systeem, tidaal) %>% 
+  summarise_at(vars(densiteit, biomassa), 
+               list(mean = ~max(0, mean(., na.rm = TRUE)),
+                    med = ~max(0, median(., na.rm = TRUE)),
+                    lwr1 = ~max(0, quantile(., 0.25, na.rm = TRUE)),
+                    upr1 = ~max(0, quantile(., 0.75, na.rm = TRUE)),
+                    lwr2 = ~max(0, quantile(., 0.05, na.rm = TRUE)),
+                    upr2 = ~max(0, quantile(., 0.95, na.rm = TRUE)))) %>% 
+  ungroup()
 
-meta_data %>% 
-  write_delim(paste0(pad_data, "meta_data.csv"),
-              delim = ";")
+```
+
+
+```{r 070-figuur-densiteit-waterlichaam, fig.height=8, fig.width=8}
+
+xlb <- "waterloop"
+ylb <- expression(paste("densiteit ", (ind/m^2)))
+
+fnt <- 8
+
+bxp_ZS <- 
+  data_macrobenthos_totaal %>% 
+  filter(waterloop2 %in% c("Zeeschelde I", "Zeeschelde II", "Zeeschelde III", "Zeeschelde IV")) %>%
+  mutate(jaar = ordered(jaar),
+         waterloop2 = factor(waterloop2,
+                             levels = c("Zeeschelde IV", "Zeeschelde III", "Zeeschelde II", "Zeeschelde I")),
+         densiteit = densiteit + 1) %>% 
+  ggplot(aes(waterloop2, densiteit, fill = jaar)) +
+  geom_boxplot() +
+  ggsci::scale_fill_simpsons() +
+  scale_y_log10(breaks = c(0,10,1000,100000)+1, labels = c(0,10,1000,100000)) +
+  labs(x = xlb,
+       y = ylb) +
+  facet_wrap(~tidaal)
+# bxp_ZS
+
+bxp_ZR <- data_macrobenthos_totaal %>% 
+  filter(waterloop2 %in% c("Rupel", "Durme", "Nete", "Dijle", "Zenne")) %>%
+  mutate(jaar = ordered(jaar),
+         waterloop2 = factor(waterloop2,
+                             levels = c("Rupel", "Durme", "Nete", "Dijle", "Zenne")),
+         densiteit = densiteit + 1) %>% 
+  ggplot(aes(waterloop2, densiteit, fill = jaar)) +
+  geom_boxplot() +
+  ggsci::scale_fill_simpsons() +
+  scale_y_log10(breaks = c(0,10,1000,100000)+1, labels = c(0,10,1000,100000)) +
+  labs(x = xlb,
+       y = ylb) +
+  facet_wrap(~tidaal)
+# bxp_ZR
+
+ggarrange(bxp_ZS + rremove("xlab") + font("xy.text", size = fnt), 
+          bxp_ZR + rremove("xlab") + font("xy.text", size = fnt), 
+          nrow = 2,
+          common.legend = TRUE)
+
+ggsave(paste0(pad_figuren, "070-figuur-densiteit-waterlichaam.jpg"))
+
+```
+
+
+```{r 070-figuur-densiteit-Zeeschelde}
+
+xlb <- "waterloop"
+ylb <- expression(paste("densiteit ", (g/m^2)))
+
+fnt <- 8
+
+data_macrobenthos_totaal %>% 
+  filter(waterloop2 %in% c("Zeeschelde I", "Zeeschelde II", "Zeeschelde III", "Zeeschelde IV", "Durme", "Rupel")) %>%
+  mutate(jaar = ordered(jaar),
+         waterloop2 = factor(waterloop2,
+                             levels = c("Zeeschelde IV", "Zeeschelde III", "Zeeschelde II", "Zeeschelde I", "Durme", "Rupel")),
+         densiteit = densiteit + 1) %>% 
+  ggplot(aes(waterloop2, densiteit, fill = jaar)) +
+  geom_boxplot() +
+  ggsci::scale_fill_simpsons() +
+  scale_y_log10(breaks = c(0,10,1000,100000)+1, labels = c(0,10,1000,100000)) +
+  labs(x = xlb,
+       y = ylb) +
+  facet_wrap(~tidaal, ncol = 1)
+
+ggsave(paste0(pad_figuren, "070-figuur-densiteit-Zeeschelde.jpg"), height=6, width=8)
+
+```
+
+
+```{r 070-figuur-densiteit-waterlichaam-alternatief}
+
+xlb <- "jaar"
+ylb <- expression(paste("densiteit ", (ind/m^2)))
+
+fnt <- 8
+
+bxp_ZS <- 
+  data_macrobenthos_tidaal %>% 
+  filter(waterloop2 %in% c("Zeeschelde I", "Zeeschelde II", "Zeeschelde III", "Zeeschelde IV")) %>%
+  mutate(waterloop2 = factor(waterloop2,
+                             levels = c("Zeeschelde IV", "Zeeschelde III", "Zeeschelde II", "Zeeschelde I")),
+         densiteit_med = densiteit_med + 1,
+         densiteit_lwr1 = densiteit_lwr1 + 1,
+         densiteit_upr1 = densiteit_upr1 + 1,
+         densiteit_lwr2 = densiteit_lwr2 + 1,
+         densiteit_upr1 = densiteit_upr2 + 1) %>% 
+  ggplot(aes(jaar, densiteit_med)) +
+  geom_line() +
+  geom_ribbon(aes(ymin = densiteit_lwr1, ymax = densiteit_upr1), alpha = 0.2) +
+  geom_ribbon(aes(ymin = densiteit_lwr2, ymax = densiteit_upr2), alpha = 0.2) +
+  # scale_x_continuous(breaks = vroegste_jaar:laatste_jaar) +
+  scale_x_continuous(breaks = seq(if_else((laatste_jaar-vroegste_jaar)%%2 == 0, vroegste_jaar, vroegste_jaar+1), laatste_jaar, 2)) +
+  scale_y_log10(breaks = c(0,10,1000,100000)+1, labels = c(0,10,1000,100000)) +
+  labs(x = xlb,
+       y = ylb) +
+  facet_grid(tidaal~waterloop2) +
+  theme(axis.text.x = element_text(angle = 45))
+bxp_ZS
+
+# ggsave(paste0(pad_figuren, "070-figuur-densiteit-Zeeschelde-alternatief.jpg"), height=4, width=8)
+
+
+bxp_ZR <- 
+  data_macrobenthos_tidaal %>% 
+  filter(waterloop2 %in% c("Rupel", "Durme", "Nete", "Dijle", "Zenne")) %>%
+  mutate(waterloop2 = factor(waterloop2,
+                             levels = c("Rupel", "Durme", "Nete", "Dijle", "Zenne")),
+         densiteit_med = densiteit_med + 1,
+         densiteit_lwr1 = densiteit_lwr1 + 1,
+         densiteit_upr1 = densiteit_upr1 + 1,
+         densiteit_lwr2 = densiteit_lwr2 + 1,
+         densiteit_upr1 = densiteit_upr2 + 1) %>% 
+  ggplot(aes(jaar, densiteit_med)) +
+  geom_line() +
+  geom_ribbon(aes(ymin = densiteit_lwr1, ymax = densiteit_upr1), alpha = 0.2) +
+  geom_ribbon(aes(ymin = densiteit_lwr2, ymax = densiteit_upr2), alpha = 0.2) +
+  scale_x_continuous(breaks = seq(if_else((laatste_jaar-vroegste_jaar)%%2 == 0, vroegste_jaar, vroegste_jaar+1), laatste_jaar, 2)) +
+  scale_y_log10(breaks = c(0,10,1000,100000)+1, labels = c(0,10,1000,100000)) +
+  labs(x = xlb,
+       y = ylb) +
+  facet_grid(tidaal~waterloop2) +
+  theme(axis.text.x = element_text(angle = 45))
+bxp_ZR
+
+ggarrange(bxp_ZS + font("xy.text", size = fnt), 
+          bxp_ZR + font("xy.text", size = fnt), 
+          nrow = 2,
+          common.legend = TRUE)
+
+ggsave(paste0(pad_figuren, "070-figuur-densiteit-waterlichaam-alternatief.jpg"), height=8, width=8)
+
+```
+
+
+```{r 070-figuur-densiteit-Zeeschelde-alternatief}
+
+xlb <- "jaar"
+ylb <- expression(paste("densiteit ", (ind/m^2)))
+
+data_macrobenthos_tidaal %>% 
+  filter(waterloop2 %in% c("Zeeschelde I", "Zeeschelde II", "Zeeschelde III", "Zeeschelde IV", "Durme", "Rupel")) %>%
+  mutate(waterloop2 = factor(waterloop2,
+                             levels = c("Zeeschelde IV", "Zeeschelde III", "Zeeschelde II", "Zeeschelde I", "Durme", "Rupel")),
+         densiteit_med = densiteit_med + 1,
+         densiteit_lwr1 = densiteit_lwr1 + 1,
+         densiteit_upr1 = densiteit_upr1 + 1,
+         densiteit_lwr2 = densiteit_lwr2 + 1,
+         densiteit_upr1 = densiteit_upr2 + 1) %>% 
+  ggplot(aes(jaar, densiteit_med)) +
+  geom_line() +
+  geom_ribbon(aes(ymin = densiteit_lwr1, ymax = densiteit_upr1), alpha = 0.2) +
+  geom_ribbon(aes(ymin = densiteit_lwr2, ymax = densiteit_upr2), alpha = 0.2) +
+  # scale_x_continuous(breaks = vroegste_jaar:laatste_jaar) +
+  scale_x_continuous(breaks = seq(if_else((laatste_jaar-vroegste_jaar)%%2 == 0, vroegste_jaar, vroegste_jaar+1), laatste_jaar, 2)) +
+  scale_y_log10(breaks = c(0,10,1000,100000)+1, labels = c(0,10,1000,100000)) +
+  labs(x = xlb,
+       y = ylb) +
+  facet_grid(waterloop2~tidaal) +
+  theme(axis.text.x = element_text(angle = 45))
+
+ggsave(paste0(pad_figuren, "070-figuur-densiteit-Zeeschelde-alternatief.jpg"), height=8, width=6)
+
+
+```
+
+
+```{r 070-figuur-biomassa-waterlichaam, fig.height=8, fig.width=8}
+
+xlb <- "waterloop"
+ylb <- expression(paste("biomassa ", (g/m^2)))
+
+fnt <- 8
+
+bxp_ZS <- 
+  data_macrobenthos_totaal %>% 
+  filter(waterloop2 %in% c("Zeeschelde I", "Zeeschelde II", "Zeeschelde III", "Zeeschelde IV")) %>%
+  mutate(jaar = ordered(jaar),
+         waterloop2 = factor(waterloop2,
+                             levels = c("Zeeschelde IV", "Zeeschelde III", "Zeeschelde II", "Zeeschelde I")),
+         biomassa = biomassa + biom_min) %>% 
+  ggplot(aes(waterloop2, biomassa, fill = jaar)) +
+  geom_boxplot() +
+  ggsci::scale_fill_simpsons() +
+  scale_y_log10(breaks = c(0,0.1,1,10,100,1000)+biom_min, labels = c(0,0.1,1,10,100,1000)) +
+  labs(x = xlb,
+       y = ylb) +
+  facet_wrap(~tidaal)
+# bxp_ZS
+
+bxp_ZR <- data_macrobenthos_totaal %>% 
+  filter(waterloop2 %in% c("Rupel", "Durme", "Nete", "Dijle", "Zenne")) %>%
+  mutate(jaar = ordered(jaar),
+         waterloop2 = factor(waterloop2,
+                             levels = c("Rupel", "Durme", "Nete", "Dijle", "Zenne")),
+         biomassa = biomassa + biom_min) %>% 
+  ggplot(aes(waterloop2, biomassa, fill = jaar)) +
+  geom_boxplot() +
+  ggsci::scale_fill_simpsons() +
+  scale_y_log10(breaks = c(0,0.1,1,10,100,1000)+biom_min, labels = c(0,0.1,1,10,100,1000)) +
+  labs(x = xlb,
+       y = ylb) +
+  facet_wrap(~tidaal)
+# bxp_ZR
+
+ggarrange(bxp_ZS + rremove("xlab") + font("xy.text", size = fnt), 
+          bxp_ZR + rremove("xlab") + font("xy.text", size = fnt), 
+          nrow = 2,
+          common.legend = TRUE)
+
+ggsave(paste0(pad_figuren, "070-figuur-biomassa-waterlichaam.jpg"))
+
+```
+
+
+```{r 070-figuur-biomassa-Zeeschelde}
+
+xlb <- "waterloop"
+ylb <- expression(paste("biomassa ", (g/m^2)))
+
+fnt <- 8
+
+data_macrobenthos_totaal %>% 
+  filter(waterloop2 %in% c("Zeeschelde I", "Zeeschelde II", "Zeeschelde III", "Zeeschelde IV", "Durme", "Rupel")) %>%
+  mutate(jaar = ordered(jaar),
+         waterloop2 = factor(waterloop2,
+                             levels = c("Zeeschelde IV", "Zeeschelde III", "Zeeschelde II", "Zeeschelde I", "Durme", "Rupel")),
+         biomassa = biomassa + biom_min) %>% 
+  ggplot(aes(waterloop2, biomassa, fill = jaar)) +
+  geom_boxplot() +
+  ggsci::scale_fill_simpsons() +
+  scale_y_log10(breaks = c(0,0.1,1,10,100,1000)+biom_min, labels = c(0,0.1,1,10,100,1000)) +
+  labs(x = xlb,
+       y = ylb) +
+  facet_wrap(~tidaal, ncol = 1)
+
+ggsave(paste0(pad_figuren, "070-figuur-biomassa-Zeeschelde.jpg"), height=6, width=8)
+
+```
+
+
+```{r 070-figuur-biomassa-waterlichaam-alternatief}
+
+xlb <- "jaar"
+ylb <- expression(paste("biomassa ", (g/m^2)))
+
+fnt <- 8
+
+bxp_ZS <- 
+  data_macrobenthos_tidaal %>% 
+  filter(waterloop2 %in% c("Zeeschelde I", "Zeeschelde II", "Zeeschelde III", "Zeeschelde IV")) %>%
+  mutate(waterloop2 = factor(waterloop2,
+                             levels = c("Zeeschelde IV", "Zeeschelde III", "Zeeschelde II", "Zeeschelde I")),
+         biomassa_med = biomassa_med + biom_min,
+         biomassa_lwr1 = biomassa_lwr1 + biom_min,
+         biomassa_upr1 = biomassa_upr1 + biom_min,
+         biomassa_lwr2 = biomassa_lwr2 + biom_min,
+         biomassa_upr1 = biomassa_upr2 + biom_min) %>% 
+  ggplot(aes(jaar, biomassa_med)) +
+  geom_line() +
+  geom_ribbon(aes(ymin = biomassa_lwr1, ymax = biomassa_upr1), alpha = 0.2) +
+  geom_ribbon(aes(ymin = biomassa_lwr2, ymax = biomassa_upr2), alpha = 0.2) +
+  # scale_x_continuous(breaks = vroegste_jaar:laatste_jaar) +
+  scale_x_continuous(breaks = seq(if_else((laatste_jaar-vroegste_jaar)%%2 == 0, vroegste_jaar, vroegste_jaar+1), laatste_jaar, 2)) +
+  scale_y_log10(breaks = c(0,0.1,1,10,100,1000)+biom_min, labels = c(0,0.1,1,10,100,1000)) +
+  labs(x = xlb,
+       y = ylb) +
+  facet_grid(tidaal~waterloop2) +
+  theme(axis.text.x = element_text(angle = 45))
+bxp_ZS
+
+# ggsave(paste0(pad_figuren, "070-figuur-biomassa-Zeeschelde-alternatief.jpg"), height=4, width=8)
+
+
+bxp_ZR <- 
+  data_macrobenthos_tidaal %>% 
+  filter(waterloop2 %in% c("Rupel", "Durme", "Nete", "Dijle", "Zenne")) %>%
+  mutate(waterloop2 = factor(waterloop2,
+                             levels = c("Rupel", "Durme", "Nete", "Dijle", "Zenne")),
+         biomassa_med = biomassa_med + biom_min,
+         biomassa_lwr1 = biomassa_lwr1 + biom_min,
+         biomassa_upr1 = biomassa_upr1 + biom_min,
+         biomassa_lwr2 = biomassa_lwr2 + biom_min,
+         biomassa_upr1 = biomassa_upr2 + biom_min) %>% 
+  ggplot(aes(jaar, biomassa_med)) +
+  geom_line() +
+  geom_ribbon(aes(ymin = biomassa_lwr1, ymax = biomassa_upr1), alpha = 0.2) +
+  geom_ribbon(aes(ymin = biomassa_lwr2, ymax = biomassa_upr2), alpha = 0.2) +
+  scale_x_continuous(breaks = seq(if_else((laatste_jaar-vroegste_jaar)%%2 == 0, vroegste_jaar, vroegste_jaar+1), laatste_jaar, 2)) +
+  scale_y_log10(breaks = c(0,0.1,1,10,100,1000)+biom_min, labels = c(0,0.1,1,10,100,1000)) +
+  labs(x = xlb,
+       y = ylb) +
+  facet_grid(tidaal~waterloop2) +
+  theme(axis.text.x = element_text(angle = 45))
+bxp_ZR
+
+ggarrange(bxp_ZS + font("xy.text", size = fnt), 
+          bxp_ZR + font("xy.text", size = fnt), 
+          nrow = 2,
+          common.legend = TRUE)
+
+ggsave(paste0(pad_figuren, "070-figuur-biomassa-waterlichaam-alternatief.jpg"), height=8, width=8)
+
+```
+
+
+```{r 070-figuur-biomassa-Zeeschelde-alternatief}
+
+xlb <- "jaar"
+ylb <- expression(paste("biomassa ", (g/m^2)))
+
+data_macrobenthos_tidaal %>% 
+  filter(waterloop2 %in% c("Zeeschelde I", "Zeeschelde II", "Zeeschelde III", "Zeeschelde IV", "Durme", "Rupel")) %>%
+  mutate(waterloop2 = factor(waterloop2,
+                             levels = c("Zeeschelde IV", "Zeeschelde III", "Zeeschelde II", "Zeeschelde I", "Durme", "Rupel")),
+         biomassa_med = biomassa_med + biom_min,
+         biomassa_lwr1 = biomassa_lwr1 + biom_min,
+         biomassa_upr1 = biomassa_upr1 + biom_min,
+         biomassa_lwr2 = biomassa_lwr2 + biom_min,
+         biomassa_upr1 = biomassa_upr2 + biom_min) %>% 
+  ggplot(aes(jaar, biomassa_med)) +
+  geom_line() +
+  geom_ribbon(aes(ymin = biomassa_lwr1, ymax = biomassa_upr1), alpha = 0.2) +
+  geom_ribbon(aes(ymin = biomassa_lwr2, ymax = biomassa_upr2), alpha = 0.2) +
+  # scale_x_continuous(breaks = vroegste_jaar:laatste_jaar) +
+  scale_x_continuous(breaks = seq(if_else((laatste_jaar-vroegste_jaar)%%2 == 0, vroegste_jaar, vroegste_jaar+1), laatste_jaar, 2)) +
+  scale_y_log10(breaks = c(0,0.1,1,10,100,1000)+biom_min, labels = c(0,0.1,1,10,100,1000)) +
+  labs(x = xlb,
+       y = ylb) +
+  facet_grid(waterloop2~tidaal) +
+  theme(axis.text.x = element_text(angle = 45))
+
+ggsave(paste0(pad_figuren, "070-figuur-biomassa-Zeeschelde-alternatief.jpg"), height=8, width=6)
+
+```
+
+
+```{r 070-figuur-aandeel-legel-stalen}
+
+data_macrobenthos_totaal %>% 
+  group_by(jaar, waterloop = waterloop2, systeem) %>% 
+  summarise(leeg = sum(densiteit == 0 & biomassa == 0),
+            totaal = n(),
+            leeg_perc = leeg/totaal*100) %>% 
+  ungroup() %>% 
+  mutate(waterloop = factor(waterloop, levels = waterlopen_order)) %>% 
+  ggplot(aes(jaar, leeg_perc, color = waterloop)) +
+  geom_line(aes(linetype = systeem), size = 1) +
+  geom_point(aes(shape = systeem), size = 3) +
+  scale_x_continuous(breaks = seq(if_else((laatste_jaar-vroegste_jaar)%%2 == 0, vroegste_jaar, vroegste_jaar+1), laatste_jaar, 2)) +
+  scale_y_continuous(breaks = seq(0,50,10), labels = paste0(seq(0,50,10), "%")) +
+  labs(y = "aandeel lege stalen")
+
+ggsave(paste0(pad_figuren, "070-figuur-aandeel-lege-stalen.jpg"), height=5, width=8)
+
+```
+
+
+```{r soortenrijkdom-ZeescheldeIV}
+
+data_macrobenthos %>% 
+  filter(waterloop2 == "Zeeschelde IV",
+         fysiotoop %in% fysiotoop_order,
+         fysiotoop != "hard substraat") %>% 
+  mutate(is_soort = if_else(soort == "geen", 0, 1)) %>% 
+  group_by(jaar, fysiotoop, locatie) %>% 
+  summarise(n = sum(is_soort)) %>% 
+  ungroup() %>% 
+  mutate(jaar = ordered(jaar),
+         fysiotoop = factor(fysiotoop, levels = fysiotoop_order)) %>% 
+  ggplot(aes(fysiotoop, n, fill = jaar)) +
+  geom_boxplot() +
+  ggsci::scale_fill_simpsons() +
+  labs(y = "aantal soorten")
+
+ggsave(paste0(pad_figuren, "070-figuur-soortenrijkdom-ZeescheldeIV.jpg"), height=5, width=8)
 
 ```
 

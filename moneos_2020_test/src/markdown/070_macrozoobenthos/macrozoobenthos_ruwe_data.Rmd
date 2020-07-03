@@ -58,11 +58,59 @@ macrobenthos_sheet <-
 ```
 
 
+```{r code-waterlopen}
+
+# # temp <-
+# #   read_excel(paste0(pad_data, "S_DS_V_002_macrobenthos_data2008-2017_rapportage2019_3.xlsx"),
+# #              sheet = "densiteit") %>% 
+# 
+# 
+# temp <-
+#   read_excel(paste0(pad_data, "SpatialBenthos2018.xlsx")) %>% 
+#   rename(locatie = staal)
+# 
+# temp <-
+#   temp %>%
+#   mutate(code = str_sub(locatie, 1, 2))
+# 
+# waterloop <-
+#   temp %>%
+#   distinct(waterlichaam,
+#            waterloop,
+#            code) %>%
+#   arrange(waterlichaam, waterloop)
+# 
+# write_xlsx(waterloop, path = paste0(pad_data, "code_waterlopen.xlsx"))
+
+
+```
+
+
+```{r ecotopen-en-waterlopen}
+
+ecotopen <- read_excel(paste0(pad_data, "Ecotoop_check_SP18.xlsx"))
+code_waterlopen <- read_excel(paste0(pad_data, "code_waterlopen.xlsx"))
+
+# strata <- read_excel(paste0(pad_data, "VERDELING PER STRATUM 2019.xlsx"))
+
+```
+
+
 ```{r selectie-spatial-datapunten}
 
 macrobenthos_spatial <-
   macrobenthos_sheet %>% 
-  filter(str_sub(staal, 3, 4) == "18")
+  filter(str_sub(staal, 1, 2) %in% code_waterlopen$code,
+         str_sub(staal, 3, 4) == "18")
+
+ecotopen <-
+  ecotopen %>% 
+  filter(str_sub(locatie, 1, 2) %in% code_waterlopen$code,
+         str_sub(locatie, 3, 4) == "18")
+
+zonder_ecotoop <-
+  ecotopen %>% 
+  filter(is.na(ecotoop_werkelijk))
 
 ```
 
@@ -73,7 +121,9 @@ macrobenthos_spatial <-
   macrobenthos_spatial %>% 
   group_by(campagne, staal, datum, soort) %>% 
   summarise(aantal = sum(aantal),
-            AFDW = sum(AFDW))
+            AFDW = sum(AFDW)) %>% 
+  mutate(aantalperm2 = aantal*628.8,
+         AFDWperm2 = AFDW*628.8)
 
 # testen op duplicaten
 # macrobenthos_spatial %>% 
@@ -83,12 +133,43 @@ macrobenthos_spatial <-
 
 ```
 
-```{r}
 
-ecotopen <- read_excel(paste0(pad_data, "Ecotoop_check_SP18.xlsx"))
+```{r toevoegen-waterlopen}
 
-strata <- read_excel(paste0(pad_data, "VERDELING PER STRATUM 2019.xlsx"))
+macrobenthos_spatial <-
+  macrobenthos_spatial %>% 
+  mutate(code = str_sub(staal, 1, 2)) %>% 
+  left_join(code_waterlopen)
+  
 
 ```
 
+
+```{r toevoegen-ecotopen}
+
+macrobenthos_spatial <-
+  macrobenthos_spatial %>% 
+  left_join(ecotopen %>% 
+              select(staal = locatie,
+                     real_X,
+                     real_Y,
+                     Z,
+                     ecotoop_gepland,
+                     ecotoop_werkelijk,
+                     tidaal_gepland = tidaal)) %>% 
+  mutate(tidaal_werkelijk = if_else(str_detect(ecotoop_werkelijk, "subtidaal"), "sub", "inter"))
+
+test_ecotoop <- 
+  macrobenthos_spatial %>% 
+  filter(is.na(ecotoop_werkelijk) |
+           ecotoop_gepland != ecotoop_werkelijk)
+
+```
+
+
+```{r wegschrijven-dataset}
+
+write_xlsx(macrobenthos_spatial, path = paste0(pad_data, "macrobenthos_spatial_2018.xlsx"))
+
+```
 
