@@ -742,14 +742,15 @@ oppsruw <- read_excel(paste0(pad_data, "SpatialEcotopenOPP_ApplEcotoop_INBO_v201
   
   totaal  <-data_macrobenthos_OPPWL %>% 
     group_by(jaar) %>% 
+    filter(grepl("Zeeschelde", waterloop)) %>% 
     summarise(biomass_waterloop = sum(biomass_waterloop)) %>% 
-    mutate (waterloop = "totaal")
+    mutate (waterloop = "totaal_Zeeschelde")
   
   data_macrobenthos_OPPWL <- data_macrobenthos_OPPWL %>% 
      bind_rows(totaal) 
   
   data_macrobenthos_OPPWL$waterloop <- factor(data_macrobenthos_OPPWL$waterloop, levels=c("Zeeschelde IV","Zeeschelde III","Zeeschelde II","Zeeschelde I",
-                                         "Rupel","Durme","totaal"))
+                                         "Rupel","Durme","totaal_Zeeschelde"))
   
   data_macrobenthos_OPPWL %>% 
     ggplot(aes(x = as.factor(jaar), y = biomass_waterloop))+
