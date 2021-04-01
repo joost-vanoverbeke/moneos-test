@@ -51,7 +51,7 @@ pad_tabellen <- maak_pad(params$hoofdstuk, "tabellen")
 ```{r benodigde-seizoenen}
 
 vroegste_seizoen <- "1991/1992"
-laatste_seizoen <- "2018/19"
+laatste_seizoen <- "2019/2020"
 
 seizoenen <-
   (vroegste_seizoen %>% str_sub(0, 4) %>% as.numeric):(laatste_seizoen %>% str_sub(0, 4) %>% as.numeric) %>% 
@@ -73,6 +73,115 @@ gebiedsgroepen <-
   mutate(gebiedscode = as.character(gebiedscode))
 
 ```
+
+
+```{r basis-query-tellingen}
+
+query_tellingen <- 
+"SELECT 
+  su.SurveyCode AS ProjectCode
+, su.SurveyNaam AS Project
+, a.AnalyseSetKey AS AnalyseSetCode
+, a.AnalyseSetNaam AS AnalyseSet
+, l.RegioWVNaam AS Regio
+, l.LocationWVCode AS GebiedsCode
+, l.LocationWVNaam AS Gebied
+, ss.Seasonname AS Telseizoen
+, e.EventLabel AS Telling
+, e.SortOrder AS TellingSortOrder
+, f.SampleDate AS Teldatum
+, s.CoverageCode AS TelvolledigheidCode
+, s.CoverageDescription AS Telvolledigheid
+, s.IsNulTelling AS Nultelling
+FROM FactAnalyseSetOccurrence f
+  INNER JOIN DimSurvey su ON su.surveykey = f.surveykey
+  INNER JOIN DimAnalyseSet a ON a.AnalyseSetKey = f.AnalyseSetKey
+  INNER JOIN DimLocationWV l ON l.locationwvkey = f.locationwvkey
+  INNER JOIN DimSeason ss ON ss.Seasonkey = f.seasonkey
+  INNER JOIN DimEvent e ON e.eventkey = f.eventkey
+  INNER JOIN DimSample s ON s.SampleKey = f.SampleKey
+WHERE 1=1
+  AND s.samplestatus = 'CHECKED' /**alleen gevalideerde records**/
+  AND s.coveragecode not in ('-', 'N')  /**niet getelde tellingen zijn irrelevant**/
+;"
+
+query_grouping <- 
+"GROUP BY 
+  su.SurveyCode
+, su.SurveyNaam
+, a.AnalyseSetKey
+, a.AnalyseSetNaam
+, l.RegioWVCode
+, l.RegioWVNaam
+, l.LocationWVCode
+, l.LocationWVNaam
+, ss.Seasonname
+, e.EventCode
+, e.EventLabel
+, e.SortOrder
+, f.SampleDate
+, s.CoverageCode
+, s.CoverageDescription
+, s.IsNulTelling;"
+
+
+query_tellingen <- 
+"SELECT 
+  su.SurveyCode AS ProjectCode
+, su.SurveyNaam AS Project
+, a.AnalyseSetKey AS AnalyseSetCode
+, a.AnalyseSetNaam AS AnalyseSet
+, l.RegioWVNaam AS Regio
+, l.LocationWVCode AS GebiedsCode
+, l.LocationWVNaam AS Gebied
+, ss.Seasonname AS Telseizoen
+, e.EventLabel AS Telling
+, e.SortOrder AS TellingSortOrder
+, s.SampleDate AS Teldatum
+, s.CoverageCode AS TelvolledigheidCode
+, s.CoverageDescription AS Telvolledigheid
+, s.IsNulTelling AS Nultelling
+FROM DimSample s
+  INNER JOIN DimSurvey su ON su.surveykey = s.surveykey
+  INNER JOIN DimAnalyseSet a ON a.AnalyseSetKey = s.AnalyseSetKey
+  INNER JOIN DimLocationWV l ON l.locationwvkey = s.locationwvkey
+  INNER JOIN DimSeason ss ON ss.Seasonkey = s.seasonkey
+  INNER JOIN DimEvent e ON e.eventkey = s.eventkey
+WHERE 1=1
+  AND s.samplestatus = 'CHECKED' /**alleen gevalideerde records**/
+  AND s.coveragecode not in ('-', 'N')  /**niet getelde tellingen zijn irrelevant**/
+;"
+
+```
+
+
+```{r bevragen-warehouse-zeeschelde-tellingen}
+
+query <-
+  paste0(str_sub(query_tellingen, end=-2),
+         " AND f.AnalyseSetKey = 1 /**alleen Zeescheldetellingen**/",
+         " AND ss.seasonname in ",
+         seizoenen_query,
+         str_sub(query_grouping, end=-2),
+         ";"
+  )
+
+# con <- connect_inbo_dbase("W0004_00_Waterbirds")
+overzicht_tellingen <- 
+  dbGetQuery(con,
+             query)
+# dbDisconnect(con)
+
+# selectie van de telgebieden gespecifieerd in de Zeeschelde_gebiedsgroepen - KRWZS
+overzicht_tellingen <-
+  overzicht_tellingen %>% 
+  filter(GebiedsCode %in% gebiedsgroepen$gebiedscode)
+
+overzicht_tellingen %>% 
+  distinct(Nultelling)
+
+```
+
 
 
 ```{r basis-query}
